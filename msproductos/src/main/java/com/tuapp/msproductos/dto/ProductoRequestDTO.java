@@ -1,5 +1,6 @@
 package com.tuapp.msproductos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,26 +18,19 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear o actualizar un producto.")
 public class ProductoRequestDTO {
 
-    /**
-     * Nombre del producto.
-     */
+    @Schema(description = "Nombre del producto.", example = "Pizza Napolitana")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    /**
-     * Precio del producto.
-     *
-     * Debe ser mayor a 0.
-     */
+    @Schema(description = "Precio del producto. Debe ser mayor a 0.", example = "8990")
     @NotNull(message = "El precio es obligatorio")
     @Positive(message = "El precio debe ser mayor a 0")
     private Double precio;
 
-    /**
-     * Categoría del producto.
-     */
+    @Schema(description = "Categoría del producto.", example = "Comida rápida")
     @NotBlank(message = "La categoría es obligatoria")
     private String categoria;
 

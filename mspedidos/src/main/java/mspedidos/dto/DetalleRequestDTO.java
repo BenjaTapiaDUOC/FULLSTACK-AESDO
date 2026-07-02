@@ -1,5 +1,6 @@
 package mspedidos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -15,24 +16,19 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Representa un producto dentro del pedido.")
 public class DetalleRequestDTO {
 
-    /**
-     * Identificador del producto.
-     */
+    @Schema(description = "Identificador del producto.", example = "10")
     @NotNull(message = "El productoId es obligatorio")
     private Long productoId;
 
-    /**
-     * Cantidad solicitada. Debe ser al menos 1.
-     */
+    @Schema(description = "Cantidad solicitada. Debe ser al menos 1.", example = "2")
     @NotNull(message = "La cantidad es obligatoria")
     @Min(value = 1, message = "La cantidad debe ser al menos 1")
     private Integer cantidad;
 
-    /**
-     * Precio unitario del producto. Debe ser mayor a 0.
-     */
+    @Schema(description = "Precio unitario del producto. Debe ser mayor a 0.", example = "5990.0")
     @NotNull(message = "El precio es obligatorio")
     @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
     private Double precio;

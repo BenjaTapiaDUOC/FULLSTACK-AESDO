@@ -1,5 +1,6 @@
 package com.tuapp.msrestaurantes.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -15,38 +16,26 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear o actualizar un restaurante.")
 public class RestauranteRequestDTO {
 
-    /**
-     * Nombre del restaurante.
-     */
+    @Schema(description = "Nombre del restaurante.", example = "La Trattoria")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    /**
-     * Dirección física del restaurante.
-     */
+    @Schema(description = "Dirección física del restaurante.", example = "Av. Siempre Viva 123")
     @NotBlank(message = "La dirección es obligatoria")
     private String direccion;
 
-    /**
-     * Categoría o tipo de cocina.
-     */
+    @Schema(description = "Categoría o tipo de cocina.", example = "Italiana")
     @NotBlank(message = "La categoría es obligatoria")
     private String categoria;
 
-    /**
-     * Horario de atención.
-     */
+    @Schema(description = "Horario de atención.", example = "09:00 - 22:00")
     @NotBlank(message = "El horario es obligatorio")
     private String horario;
 
-    /**
-     * Estado del restaurante.
-     *
-     * Es opcional al crear: si no se envía, el servicio
-     * asigna por defecto el valor true (ACTIVO).
-     */
+    @Schema(description = "Estado del restaurante. Es opcional al crear; por defecto true (ACTIVO).", example = "true")
     private Boolean activo;
 
 }

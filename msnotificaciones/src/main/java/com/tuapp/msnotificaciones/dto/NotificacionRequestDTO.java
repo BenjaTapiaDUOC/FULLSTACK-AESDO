@@ -1,5 +1,6 @@
 package com.tuapp.msnotificaciones.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -18,41 +19,26 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear una notificación.")
 public class NotificacionRequestDTO {
 
-    /**
-     * Identificador del usuario (msusuarios) que recibirá
-     * la notificación.
-     */
+    @Schema(description = "Identificador del usuario (msusuarios) que recibirá la notificación.", example = "1")
     @NotNull(message = "El usuarioId es obligatorio")
     private Long usuarioId;
 
-    /**
-     * Tipo de notificación.
-     *
-     * Ejemplos: PAGO_APROBADO, PEDIDO_ENVIADO, DELIVERY_ASIGNADO.
-     */
+    @Schema(description = "Tipo de notificación.", example = "PAGO_APROBADO")
     @NotBlank(message = "El tipo de notificación es obligatorio")
     private String tipo;
 
-    /**
-     * Mensaje descriptivo de la notificación.
-     */
+    @Schema(description = "Mensaje descriptivo de la notificación.", example = "Tu pago fue aprobado exitosamente.")
     @NotBlank(message = "El mensaje es obligatorio")
     private String mensaje;
 
-    /**
-     * Microservicio de origen que generó el evento.
-     *
-     * Valores permitidos: PAGOS, PEDIDOS, DELIVERY.
-     */
+    @Schema(description = "Microservicio de origen que generó el evento.", example = "PAGOS", allowableValues = {"PAGOS", "PEDIDOS", "DELIVERY"})
     @NotBlank(message = "El origen es obligatorio")
     private String origen;
 
-    /**
-     * Identificador de la entidad de origen (id del pago,
-     * pedido o delivery) que generó el evento.
-     */
+    @Schema(description = "Identificador de la entidad de origen (id del pago, pedido o delivery) que generó el evento.", example = "10")
     @NotNull(message = "La referenciaId es obligatoria")
     private Long referenciaId;
 

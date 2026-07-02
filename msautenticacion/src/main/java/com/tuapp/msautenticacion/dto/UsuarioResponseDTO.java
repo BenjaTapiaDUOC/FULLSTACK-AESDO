@@ -1,5 +1,6 @@
 package com.tuapp.msautenticacion.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,31 +18,22 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa la información de autenticación de un usuario (sin exponer la contraseña).")
 public class UsuarioResponseDTO {
 
-    /**
-     * Identificador del registro de autenticación.
-     */
+    @Schema(description = "Identificador del registro de autenticación.", example = "1")
     private Long id;
 
-    /**
-     * Identificador del usuario real en msusuarios.
-     */
+    @Schema(description = "Identificador del usuario real en msusuarios.", example = "1")
     private Long usuarioId;
 
-    /**
-     * Nombre del usuario.
-     */
+    @Schema(description = "Nombre del usuario.", example = "Benjamin")
     private String nombre;
 
-    /**
-     * Correo electrónico.
-     */
+    @Schema(description = "Correo electrónico.", example = "benjamin@gmail.com")
     private String email;
 
-    /**
-     * Nombre del rol asignado (ADMIN, CLIENTE, REPARTIDOR).
-     */
+    @Schema(description = "Nombre del rol asignado.", example = "CLIENTE", allowableValues = {"ADMIN", "CLIENTE", "REPARTIDOR"})
     private String rol;
 
 }

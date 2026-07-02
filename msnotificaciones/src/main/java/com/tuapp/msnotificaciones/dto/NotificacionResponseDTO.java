@@ -1,5 +1,6 @@
 package com.tuapp.msnotificaciones.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -18,46 +19,31 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa una notificación registrada en el sistema.")
 public class NotificacionResponseDTO {
 
-    /**
-     * Identificador de la notificación.
-     */
+    @Schema(description = "Identificador de la notificación.", example = "1")
     private Long id;
 
-    /**
-     * Identificador del usuario dueño de la notificación.
-     */
+    @Schema(description = "Identificador del usuario dueño de la notificación.", example = "1")
     private Long usuarioId;
 
-    /**
-     * Tipo de notificación.
-     */
+    @Schema(description = "Tipo de notificación.", example = "PAGO_APROBADO")
     private String tipo;
 
-    /**
-     * Mensaje descriptivo de la notificación.
-     */
+    @Schema(description = "Mensaje descriptivo de la notificación.", example = "Tu pago fue aprobado exitosamente.")
     private String mensaje;
 
-    /**
-     * Microservicio de origen que generó el evento.
-     */
+    @Schema(description = "Microservicio de origen que generó el evento.", example = "PAGOS")
     private String origen;
 
-    /**
-     * Identificador de la entidad de origen del evento.
-     */
+    @Schema(description = "Identificador de la entidad de origen del evento.", example = "10")
     private Long referenciaId;
 
-    /**
-     * Fecha y hora en que se generó la notificación.
-     */
+    @Schema(description = "Fecha y hora en que se generó la notificación.", example = "2026-07-02T10:20:00")
     private LocalDateTime fechaEnvio;
 
-    /**
-     * Indica si la notificación ya fue leída.
-     */
+    @Schema(description = "Indica si la notificación ya fue leída.", example = "false")
     private boolean leida;
 
 }

@@ -4,8 +4,16 @@ import com.tuapp.msrepartidores.dto.CambioEstadoRequestDTO;
 import com.tuapp.msrepartidores.dto.RepartidorRequestDTO;
 import com.tuapp.msrepartidores.dto.RepartidorResponseDTO;
 import com.tuapp.msrepartidores.service.RepartidorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,20 +24,10 @@ import java.util.List;
  * CONTROLADOR DE REPARTIDORES
  * ===========================================================
  *
- * Este controlador expone los servicios REST del microservicio
- * de repartidores.
- *
- * Todas las peticiones realizadas desde Postman (o desde otro
- * microservicio como msdelivery) llegan primero a esta clase,
- * la cual se encarga de recibir la solicitud, validar los
- * datos y delegar la lógica de negocio al RepartidorService.
- *
  * Base URL del microservicio:
- *
  * http://localhost:8088/repartidores
  *
  * Endpoints disponibles:
- *
  * POST    /repartidores
  * GET     /repartidores
  * GET     /repartidores/disponibles
@@ -38,12 +36,13 @@ import java.util.List;
  * PATCH   /repartidores/{id}/estado
  * DELETE  /repartidores/{id}
  *
- * Todos los endpoints devuelven respuestas HTTP utilizando
- * ResponseEntity y pueden probarse fácilmente desde Postman.
+ * Documentación interactiva (Swagger UI):
+ * http://localhost:8088/swagger-ui/index.html
  */
 
 @RestController
 @RequestMapping("/repartidores")
+@Tag(name = "Repartidores", description = "Gestión de los repartidores y su disponibilidad.")
 public class RepartidorController {
 
     private final RepartidorService service;
@@ -52,64 +51,40 @@ public class RepartidorController {
         this.service = service;
     }
 
-    /**
-     * ===========================================================
-     * CREAR REPARTIDOR
-     * ===========================================================
-     *
-     * Método HTTP:
-     * POST
-     *
-     * URL:
-     * http://localhost:8088/repartidores
-     *
-     * POSTMAN
-     *
-     * Body -> raw -> JSON
-     *
-     * {
-     *   "nombre":"Cristobal Soto",
-     *   "vehiculo":"Moto"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 201 CREATED
-     *
-     * El repartidor se crea automáticamente en estado
-     * DISPONIBLE.
-     */
-
+    @Operation(summary = "Crear un repartidor", description = "Registra un nuevo repartidor. Se crea automáticamente en estado DISPONIBLE.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Repartidor creado exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "nombre": "Cristobal Soto",
+                              "vehiculo": "Moto",
+                              "estado": "DISPONIBLE"
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PostMapping
-    public ResponseEntity<RepartidorResponseDTO> crear(@Valid @RequestBody RepartidorRequestDTO dto) {
+    public ResponseEntity<RepartidorResponseDTO> crear(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del repartidor a crear", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Cristobal Soto",
+                              "vehiculo": "Moto"
+                            }
+                            """)))
+            @Valid @RequestBody RepartidorRequestDTO dto) {
 
         RepartidorResponseDTO repartidor = service.crearRepartidor(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(repartidor);
     }
 
-    /**
-     * ===========================================================
-     * LISTAR REPARTIDORES
-     * ===========================================================
-     *
-     * Método:
-     * GET
-     *
-     * URL:
-     * http://localhost:8088/repartidores
-     *
-     * POSTMAN
-     *
-     * Seleccionar GET
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     */
-
+    @Operation(summary = "Listar repartidores", description = "Retorna el listado completo de repartidores registrados.")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping
     public ResponseEntity<List<RepartidorResponseDTO>> listar() {
 
@@ -117,25 +92,11 @@ public class RepartidorController {
 
     }
 
-    /**
-     * ===========================================================
-     * LISTAR REPARTIDORES DISPONIBLES
-     * ===========================================================
-     *
-     * Método:
-     * GET
-     *
-     * URL:
-     * http://localhost:8088/repartidores/disponibles
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Retorna únicamente los repartidores en estado
-     * DISPONIBLE. Pensado para ser consumido por msdelivery.
-     */
-
+    @Operation(
+            summary = "Listar repartidores disponibles",
+            description = "Retorna únicamente los repartidores en estado DISPONIBLE. Pensado para ser consumido por msdelivery."
+    )
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping("/disponibles")
     public ResponseEntity<List<RepartidorResponseDTO>> listarDisponibles() {
 
@@ -143,141 +104,92 @@ public class RepartidorController {
 
     }
 
-    /**
-     * ===========================================================
-     * OBTENER REPARTIDOR POR ID
-     * ===========================================================
-     *
-     * Método:
-     * GET
-     *
-     * URL:
-     *
-     * http://localhost:8088/repartidores/1
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si no existe:
-     *
-     * HTTP 404 NOT FOUND
-     */
-
+    @Operation(summary = "Obtener un repartidor por ID", description = "Busca y retorna un repartidor específico según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Repartidor encontrado"),
+            @ApiResponse(responseCode = "404", description = "El repartidor no existe", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<RepartidorResponseDTO> obtener(@PathVariable Long id) {
+    public ResponseEntity<RepartidorResponseDTO> obtener(
+            @Parameter(description = "Identificador del repartidor", example = "1") @PathVariable Long id) {
 
         return ResponseEntity.ok(service.obtenerPorId(id));
 
     }
 
-    /**
-     * ===========================================================
-     * ACTUALIZAR REPARTIDOR
-     * ===========================================================
-     *
-     * Método:
-     *
-     * PUT
-     *
-     * URL:
-     *
-     * http://localhost:8088/repartidores/1
-     *
-     * POSTMAN
-     *
-     * Body -> JSON
-     *
-     * {
-     *   "nombre":"Cristobal Soto",
-     *   "vehiculo":"Bicicleta"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * NOTA: este endpoint no modifica el estado del
-     * repartidor. Para ello utilizar
-     * PATCH /repartidores/{id}/estado
-     */
-
+    @Operation(
+            summary = "Actualizar un repartidor",
+            description = "Actualiza el nombre y/o vehículo de un repartidor. No modifica su estado; para ello usar PATCH /repartidores/{id}/estado."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Repartidor actualizado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "El repartidor no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<RepartidorResponseDTO> actualizar(
-            @PathVariable Long id,
+            @Parameter(description = "Identificador del repartidor", example = "1") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos del repartidor", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Cristobal Soto",
+                              "vehiculo": "Bicicleta"
+                            }
+                            """)))
             @Valid @RequestBody RepartidorRequestDTO dto) {
 
         return ResponseEntity.ok(service.actualizar(id, dto));
 
     }
 
-    /**
-     * ===========================================================
-     * CAMBIAR ESTADO DEL REPARTIDOR
-     * ===========================================================
-     *
-     * Método:
-     *
-     * PATCH
-     *
-     * URL:
-     *
-     * http://localhost:8088/repartidores/1/estado
-     *
-     * POSTMAN
-     *
-     * Body -> JSON
-     *
-     * {
-     *   "estado":"EN_RUTA"
-     * }
-     *
-     * Valores permitidos: DISPONIBLE, EN_RUTA, INACTIVO.
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     */
-
+    @Operation(
+            summary = "Cambiar el estado del repartidor",
+            description = "Actualiza el estado del repartidor. Valores permitidos: DISPONIBLE, EN_RUTA, INACTIVO."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Estado actualizado exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "nombre": "Cristobal Soto",
+                              "vehiculo": "Moto",
+                              "estado": "EN_RUTA"
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "404", description = "El repartidor no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Estado no válido", content = @Content)
+    })
     @PatchMapping("/{id}/estado")
     public ResponseEntity<RepartidorResponseDTO> cambiarEstado(
-            @PathVariable Long id,
+            @Parameter(description = "Identificador del repartidor", example = "1") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevo estado del repartidor", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "estado": "EN_RUTA"
+                            }
+                            """)))
             @Valid @RequestBody CambioEstadoRequestDTO dto) {
 
         return ResponseEntity.ok(service.cambiarEstado(id, dto));
 
     }
 
-    /**
-     * ===========================================================
-     * ELIMINAR REPARTIDOR
-     * ===========================================================
-     *
-     * Método:
-     *
-     * DELETE
-     *
-     * URL:
-     *
-     * http://localhost:8088/repartidores/1
-     *
-     * POSTMAN
-     *
-     * Seleccionar DELETE
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 204 NO CONTENT
-     *
-     * Si el repartidor se encuentra EN_RUTA:
-     *
-     * HTTP 400 BAD REQUEST
-     */
-
+    @Operation(
+            summary = "Eliminar un repartidor",
+            description = "Elimina de forma permanente un repartidor según su identificador. No se puede eliminar si se encuentra EN_RUTA."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Repartidor eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El repartidor no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "El repartidor se encuentra EN_RUTA", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "Identificador del repartidor", example = "1") @PathVariable Long id) {
 
         service.eliminar(id);
 

@@ -3,8 +3,16 @@ package com.tuapp.msproductos.controller;
 import com.tuapp.msproductos.dto.ProductoRequestDTO;
 import com.tuapp.msproductos.dto.ProductoResponseDTO;
 import com.tuapp.msproductos.service.ProductoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,29 +26,23 @@ import java.util.List;
  * Este controlador expone los servicios REST del microservicio
  * de productos.
  *
- * Todas las peticiones realizadas desde Postman llegan primero
- * a esta clase, la cual se encarga de recibir la solicitud,
- * validar los datos y delegar la lógica de negocio al
- * ProductoService.
- *
  * Base URL del microservicio:
- *
  * http://localhost:8082/productos
  *
  * Endpoints disponibles:
- *
  * POST    /productos
  * GET     /productos
  * GET     /productos/{id}
  * PUT     /productos/{id}
  * DELETE  /productos/{id}
  *
- * Todos los endpoints devuelven respuestas HTTP utilizando
- * ResponseEntity y pueden probarse fácilmente desde Postman.
+ * Documentación interactiva (Swagger UI):
+ * http://localhost:8082/swagger-ui/index.html
  */
 
 @RestController
 @RequestMapping("/productos")
+@Tag(name = "Productos", description = "Gestión del catálogo de productos.")
 public class ProductoController {
 
     private final ProductoService service;
@@ -49,100 +51,85 @@ public class ProductoController {
         this.service = service;
     }
 
-    /**
-     * ===========================================================
-     * CREAR PRODUCTO
-     * ===========================================================
-     *
-     * Metodo HTTP: POST
-     * URL: http://localhost:8082/productos
-     *
-     * POSTMAN
-     * Body -> raw -> JSON
-     *
-     * {
-     *   "nombre": "Pizza Napolitana",
-     *   "precio": 8990,
-     *   "categoria": "Comida rápida"
-     * }
-     *
-     * Respuesta: HTTP 201 CREATED
-     */
+    @Operation(summary = "Crear un producto", description = "Registra un nuevo producto en el catálogo.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Producto creado exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "nombre": "Pizza Napolitana",
+                              "precio": 8990,
+                              "categoria": "Comida rápida"
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PostMapping
-    public ResponseEntity<ProductoResponseDTO> crear(@Valid @RequestBody ProductoRequestDTO dto) {
+    public ResponseEntity<ProductoResponseDTO> crear(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del producto a crear", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Pizza Napolitana",
+                              "precio": 8990,
+                              "categoria": "Comida rápida"
+                            }
+                            """)))
+            @Valid @RequestBody ProductoRequestDTO dto) {
         ProductoResponseDTO producto = service.crearProducto(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(producto);
     }
 
-    /**
-     * ===========================================================
-     * LISTAR PRODUCTOS
-     * ===========================================================
-     *
-     * Metodo: GET
-     * URL: http://localhost:8082/productos
-     *
-     * Respuesta: HTTP 200 OK
-     */
+    @Operation(summary = "Listar productos", description = "Retorna el listado completo de productos del catálogo.")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping
     public ResponseEntity<List<ProductoResponseDTO>> listar() {
         return ResponseEntity.ok(service.listarProductos());
     }
 
-    /**
-     * ===========================================================
-     * OBTENER PRODUCTO POR ID
-     * ===========================================================
-     *
-     * Metodo: GET
-     * URL: http://localhost:8082/productos/1
-     *
-     * Respuesta: HTTP 200 OK
-     * Si no existe: HTTP 404 NOT FOUND
-     */
+    @Operation(summary = "Obtener un producto por ID", description = "Busca y retorna un producto específico según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto encontrado"),
+            @ApiResponse(responseCode = "404", description = "El producto no existe", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoResponseDTO> obtener(@PathVariable Long id) {
+    public ResponseEntity<ProductoResponseDTO> obtener(
+            @Parameter(description = "Identificador del producto", example = "1") @PathVariable Long id) {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
-    /**
-     * ===========================================================
-     * ACTUALIZAR PRODUCTO
-     * ===========================================================
-     *
-     * Metodo: PUT
-     * URL: http://localhost:8082/productos/1
-     *
-     * POSTMAN
-     * Body -> JSON
-     *
-     * {
-     *   "nombre": "Pizza Napolitana Familiar",
-     *   "precio": 12990,
-     *   "categoria": "Comida rápida"
-     * }
-     *
-     * Respuesta: HTTP 200 OK
-     */
+    @Operation(summary = "Actualizar un producto", description = "Actualiza el nombre, precio y/o categoría de un producto existente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Producto actualizado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "El producto no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> actualizar(
-            @PathVariable Long id,
+            @Parameter(description = "Identificador del producto", example = "1") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos del producto", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Pizza Napolitana Familiar",
+                              "precio": 12990,
+                              "categoria": "Comida rápida"
+                            }
+                            """)))
             @Valid @RequestBody ProductoRequestDTO dto) {
         return ResponseEntity.ok(service.actualizar(id, dto));
     }
 
-    /**
-     * ===========================================================
-     * ELIMINAR PRODUCTO
-     * ===========================================================
-     *
-     * Metodo: DELETE
-     * URL: http://localhost:8082/productos/1
-     *
-     * Respuesta: HTTP 204 NO CONTENT
-     */
+    @Operation(summary = "Eliminar un producto", description = "Elimina de forma permanente un producto según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El producto no existe", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "Identificador del producto", example = "1") @PathVariable Long id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }

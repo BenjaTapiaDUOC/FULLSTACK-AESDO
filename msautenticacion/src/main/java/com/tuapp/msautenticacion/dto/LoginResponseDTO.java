@@ -1,5 +1,6 @@
 package com.tuapp.msautenticacion.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,26 +17,19 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Respuesta entregada tras un login exitoso, incluye el token JWT.")
 public class LoginResponseDTO {
 
-    /**
-     * Token JWT generado.
-     */
+    @Schema(description = "Token JWT generado.", example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiZW5qYW1pbkBnbWFpbC5jb20i...")
     private String token;
 
-    /**
-     * Tipo de token. Siempre será "Bearer".
-     */
+    @Schema(description = "Tipo de token. Siempre será \"Bearer\".", example = "Bearer")
     private String tipo;
 
-    /**
-     * Tiempo de expiración del token, en milisegundos.
-     */
+    @Schema(description = "Tiempo de expiración del token, en milisegundos.", example = "3600000")
     private long expiraEnMs;
 
-    /**
-     * Información básica del usuario autenticado.
-     */
+    @Schema(description = "Información básica del usuario autenticado.")
     private UsuarioResponseDTO usuario;
 
 }

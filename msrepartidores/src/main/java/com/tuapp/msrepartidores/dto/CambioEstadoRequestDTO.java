@@ -1,6 +1,7 @@
 package com.tuapp.msrepartidores.dto;
 
 import com.tuapp.msrepartidores.model.EstadoRepartidor;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,13 +20,11 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Nuevo estado a asignar al repartidor.")
 public class CambioEstadoRequestDTO {
 
-    /**
-     * Nuevo estado del repartidor.
-     *
-     * Valores permitidos: DISPONIBLE, EN_RUTA, INACTIVO.
-     */
+    @Schema(description = "Nuevo estado del repartidor.", example = "EN_RUTA",
+            allowableValues = {"DISPONIBLE", "EN_RUTA", "INACTIVO"})
     @NotNull(message = "El estado es obligatorio")
     private EstadoRepartidor estado;
 

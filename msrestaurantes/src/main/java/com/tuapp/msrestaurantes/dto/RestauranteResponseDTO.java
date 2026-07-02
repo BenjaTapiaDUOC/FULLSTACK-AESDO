@@ -1,5 +1,6 @@
 package com.tuapp.msrestaurantes.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -20,36 +21,25 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un restaurante registrado en el sistema.")
 public class RestauranteResponseDTO {
 
-    /**
-     * Identificador del restaurante.
-     */
+    @Schema(description = "Identificador del restaurante.", example = "1")
     private Long id;
 
-    /**
-     * Nombre del restaurante.
-     */
+    @Schema(description = "Nombre del restaurante.", example = "La Trattoria")
     private String nombre;
 
-    /**
-     * Dirección física del restaurante.
-     */
+    @Schema(description = "Dirección física del restaurante.", example = "Av. Siempre Viva 123")
     private String direccion;
 
-    /**
-     * Categoría o tipo de cocina.
-     */
+    @Schema(description = "Categoría o tipo de cocina.", example = "Italiana")
     private String categoria;
 
-    /**
-     * Horario de atención.
-     */
+    @Schema(description = "Horario de atención.", example = "09:00 - 22:00")
     private String horario;
 
-    /**
-     * Estado del restaurante (activo/inactivo).
-     */
+    @Schema(description = "Estado del restaurante (activo/inactivo).", example = "true")
     private Boolean activo;
 
 }

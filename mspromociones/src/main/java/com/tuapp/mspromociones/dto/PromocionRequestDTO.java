@@ -1,5 +1,6 @@
 package com.tuapp.mspromociones.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -20,42 +21,28 @@ import java.time.LocalDate;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear o actualizar un cupón de descuento.")
 public class PromocionRequestDTO {
 
-    /**
-     * Código del cupón de descuento.
-     */
+    @Schema(description = "Código del cupón de descuento.", example = "VERANO2026")
     @NotBlank(message = "El código es obligatorio")
     private String codigo;
 
-    /**
-     * Porcentaje de descuento.
-     *
-     * Debe estar entre 0 y 100.
-     */
+    @Schema(description = "Porcentaje de descuento. Debe estar entre 0 y 100.", example = "15")
     @NotNull(message = "El porcentaje de descuento es obligatorio")
     @DecimalMin(value = "0.0", inclusive = true, message = "El porcentaje no puede ser negativo")
     @DecimalMax(value = "100.0", inclusive = true, message = "El porcentaje no puede ser mayor a 100")
     private Double porcentajeDescuento;
 
-    /**
-     * Fecha de inicio de vigencia del cupón.
-     */
+    @Schema(description = "Fecha de inicio de vigencia del cupón.", example = "2026-01-01")
     @NotNull(message = "La fecha de inicio es obligatoria")
     private LocalDate fechaInicio;
 
-    /**
-     * Fecha de término de vigencia del cupón.
-     */
+    @Schema(description = "Fecha de término de vigencia del cupón.", example = "2026-03-31")
     @NotNull(message = "La fecha de fin es obligatoria")
     private LocalDate fechaFin;
 
-    /**
-     * Estado de la promoción.
-     *
-     * Es opcional. Si no se envía, el servicio la
-     * dejará activa por defecto.
-     */
+    @Schema(description = "Estado de la promoción. Es opcional; si no se envía, queda activa por defecto.", example = "true")
     private Boolean activo;
 
 }

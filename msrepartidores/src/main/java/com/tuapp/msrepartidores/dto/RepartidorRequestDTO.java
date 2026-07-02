@@ -1,5 +1,6 @@
 package com.tuapp.msrepartidores.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -22,17 +23,14 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear o actualizar un repartidor.")
 public class RepartidorRequestDTO {
 
-    /**
-     * Nombre completo del repartidor.
-     */
+    @Schema(description = "Nombre completo del repartidor.", example = "Cristobal Soto")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    /**
-     * Vehículo utilizado por el repartidor.
-     */
+    @Schema(description = "Vehículo utilizado por el repartidor.", example = "Moto")
     @NotBlank(message = "El vehículo es obligatorio")
     private String vehiculo;
 

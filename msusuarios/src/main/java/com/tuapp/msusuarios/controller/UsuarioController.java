@@ -3,8 +3,17 @@ package com.tuapp.msusuarios.controller;
 import com.tuapp.msusuarios.dto.UsuarioRequestDTO;
 import com.tuapp.msusuarios.dto.UsuarioResponseDTO;
 import com.tuapp.msusuarios.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,10 +46,14 @@ import java.util.List;
  *
  * Todos los endpoints devuelven respuestas HTTP utilizando
  * ResponseEntity y pueden probarse fácilmente desde Postman.
+ *
+ * Documentación interactiva (Swagger UI):
+ * http://localhost:8081/swagger-ui/index.html
  */
 
 @RestController
 @RequestMapping("/usuarios")
+@Tag(name = "Usuarios", description = "Gestión de los usuarios de la plataforma (alta, consulta, actualización y eliminación).")
 public class UsuarioController {
 
     private final UsuarioService service;
@@ -53,30 +66,40 @@ public class UsuarioController {
      * ===========================================================
      * CREAR USUARIO
      * ===========================================================
-     *
-     * Metodo HTTP:
-     * POST
-     *
-     * URL:
-     * http://localhost:8081/usuarios
-     *
-     * POSTMAN
-     *
-     * Body -> raw -> JSON
-     *
-     * {
-     *   "nombre":"Benjamin",
-     *   "email":"benjamin@gmail.com",
-     *   "password":"12345678"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 201 CREATED
      */
 
+    @Operation(
+            summary = "Crear un nuevo usuario",
+            description = "Registra un nuevo usuario en el sistema. El correo debe ser único y la contraseña debe tener al menos 8 caracteres."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Usuario creado exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "nombre": "Benjamin",
+                              "email": "benjamin@gmail.com",
+                              "password": "12345678"
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o correo ya registrado", content = @Content)
+    })
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> crear(@Valid @RequestBody UsuarioRequestDTO dto) {
+    public ResponseEntity<UsuarioResponseDTO> crear(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del usuario a registrar",
+                    required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Benjamin",
+                              "email": "benjamin@gmail.com",
+                              "password": "12345678"
+                            }
+                            """))
+            )
+            @Valid @RequestBody UsuarioRequestDTO dto) {
 
         UsuarioResponseDTO usuario = service.crearUsuario(dto);
 
@@ -87,24 +110,13 @@ public class UsuarioController {
      * ===========================================================
      * LISTAR USUARIOS
      * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     * http://localhost:8081/usuarios
-     *
-     * POSTMAN
-     *
-     * Seleccionar GET
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
      */
 
+    @Operation(
+            summary = "Listar todos los usuarios",
+            description = "Retorna el listado completo de usuarios registrados en la plataforma."
+    )
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping
     public ResponseEntity<List<UsuarioResponseDTO>> listar() {
 
@@ -116,25 +128,20 @@ public class UsuarioController {
      * ===========================================================
      * OBTENER USUARIO POR ID
      * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     *
-     * http://localhost:8081/usuarios/1
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si no existe:
-     *
-     * HTTP 404 NOT FOUND
      */
 
+    @Operation(
+            summary = "Obtener un usuario por ID",
+            description = "Busca y retorna un usuario específico según su identificador."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+            @ApiResponse(responseCode = "404", description = "El usuario no existe", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<UsuarioResponseDTO> obtener(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDTO> obtener(
+            @Parameter(description = "Identificador del usuario", example = "1")
+            @PathVariable Long id) {
 
         return ResponseEntity.ok(service.obtenerPorId(id));
 
@@ -144,33 +151,32 @@ public class UsuarioController {
      * ===========================================================
      * ACTUALIZAR USUARIO
      * ===========================================================
-     *
-     * Metodo:
-     *
-     * PUT
-     *
-     * URL:
-     *
-     * http://localhost:8081/usuarios/1
-     *
-     * POSTMAN
-     *
-     * Body -> JSON
-     *
-     * {
-     *   "nombre":"Benjamin",
-     *   "email":"nuevo@gmail.com",
-     *   "password":"12345678"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
      */
 
+    @Operation(
+            summary = "Actualizar un usuario existente",
+            description = "Actualiza el nombre, correo y/o contraseña de un usuario existente."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "El usuario no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioResponseDTO> actualizar(
+            @Parameter(description = "Identificador del usuario", example = "1")
             @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos del usuario",
+                    required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "nombre": "Benjamin",
+                              "email": "nuevo@gmail.com",
+                              "password": "12345678"
+                            }
+                            """))
+            )
             @Valid @RequestBody UsuarioRequestDTO dto) {
 
         return ResponseEntity.ok(service.actualizar(id, dto));
@@ -181,28 +187,20 @@ public class UsuarioController {
      * ===========================================================
      * ELIMINAR USUARIO
      * ===========================================================
-     *
-     * Metodo:
-     *
-     * DELETE
-     *
-     * URL:
-     *
-     * http://localhost:8081/usuarios/1
-     *
-     * POSTMAN
-     *
-     * Seleccionar DELETE
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 204 NO CONTENT
      */
 
+    @Operation(
+            summary = "Eliminar un usuario",
+            description = "Elimina de forma permanente un usuario según su identificador."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Usuario eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El usuario no existe", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "Identificador del usuario", example = "1")
+            @PathVariable Long id) {
 
         service.eliminar(id);
 

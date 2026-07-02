@@ -1,5 +1,6 @@
 package com.tuapp.mspagos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -17,26 +18,19 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear o actualizar un pago.")
 public class PagoRequestDTO {
 
-    /**
-     * Identificador del pedido asociado.
-     */
+    @Schema(description = "Identificador del pedido asociado.", example = "1")
     @NotNull(message = "El pedidoId es obligatorio")
     private Long pedidoId;
 
-    /**
-     * Monto del pago.
-     *
-     * Debe ser mayor a cero.
-     */
+    @Schema(description = "Monto del pago. Debe ser mayor a cero.", example = "15000")
     @NotNull(message = "El monto es obligatorio")
     @Positive(message = "El monto debe ser mayor a cero")
     private Double monto;
 
-    /**
-     * Método de pago.
-     */
+    @Schema(description = "Método de pago.", example = "TARJETA")
     @NotBlank(message = "El método de pago es obligatorio")
     private String metodoPago;
 

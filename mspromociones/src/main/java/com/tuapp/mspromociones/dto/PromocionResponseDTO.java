@@ -1,5 +1,6 @@
 package com.tuapp.mspromociones.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,36 +18,25 @@ import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un cupón de descuento registrado en el sistema.")
 public class PromocionResponseDTO {
 
-    /**
-     * Identificador de la promoción.
-     */
+    @Schema(description = "Identificador de la promoción.", example = "1")
     private Long id;
 
-    /**
-     * Código del cupón de descuento.
-     */
+    @Schema(description = "Código del cupón de descuento.", example = "VERANO2026")
     private String codigo;
 
-    /**
-     * Porcentaje de descuento.
-     */
+    @Schema(description = "Porcentaje de descuento.", example = "15")
     private Double porcentajeDescuento;
 
-    /**
-     * Fecha de inicio de vigencia.
-     */
+    @Schema(description = "Fecha de inicio de vigencia.", example = "2026-01-01")
     private LocalDate fechaInicio;
 
-    /**
-     * Fecha de término de vigencia.
-     */
+    @Schema(description = "Fecha de término de vigencia.", example = "2026-03-31")
     private LocalDate fechaFin;
 
-    /**
-     * Estado de la promoción.
-     */
+    @Schema(description = "Estado de la promoción.", example = "true")
     private Boolean activo;
 
 }

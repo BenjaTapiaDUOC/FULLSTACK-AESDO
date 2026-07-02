@@ -1,5 +1,6 @@
 package com.example.msdelivery.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,31 +16,22 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un delivery registrado en el sistema.")
 public class DeliveryResponseDTO {
 
-    /**
-     * Identificador del delivery.
-     */
+    @Schema(description = "Identificador del delivery.", example = "1")
     private Long id;
 
-    /**
-     * Identificador del pedido asociado.
-     */
+    @Schema(description = "Identificador del pedido asociado.", example = "1")
     private Long pedidoId;
 
-    /**
-     * Dirección de entrega.
-     */
+    @Schema(description = "Dirección de entrega.", example = "Av. Siempre Viva 123")
     private String direccionEntrega;
 
-    /**
-     * Repartidor asignado.
-     */
+    @Schema(description = "Repartidor asignado.", example = "Juan Pérez")
     private String repartidor;
 
-    /**
-     * Estado actual del delivery.
-     */
+    @Schema(description = "Estado actual del delivery.", example = "PENDIENTE")
     private String estado;
 
 }

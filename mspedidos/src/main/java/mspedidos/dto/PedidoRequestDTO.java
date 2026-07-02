@@ -1,5 +1,6 @@
 package mspedidos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -20,26 +21,14 @@ import java.util.List;
  */
 
 @Data
+@Schema(description = "Datos requeridos para crear un nuevo pedido.")
 public class PedidoRequestDTO {
 
-    /**
-     * Identificador del usuario que realiza el pedido.
-     *
-     * Se valida contra el microservicio msusuarios antes
-     * de crear el pedido.
-     */
+    @Schema(description = "Identificador del usuario que realiza el pedido. Se valida contra msusuarios.", example = "1")
     @NotNull(message = "El usuarioId es obligatorio")
     private Long usuarioId;
 
-    /**
-     * Listado de productos incluidos en el pedido.
-     *
-     * @NotEmpty obliga a que el pedido tenga al menos un
-     * detalle.
-     *
-     * @Valid asegura que las validaciones de cada
-     * DetalleRequestDTO también se apliquen.
-     */
+    @Schema(description = "Listado de productos incluidos en el pedido. Debe tener al menos un detalle.")
     @NotEmpty(message = "El pedido debe tener al menos un detalle")
     @Valid
     private List<DetalleRequestDTO> detalles;

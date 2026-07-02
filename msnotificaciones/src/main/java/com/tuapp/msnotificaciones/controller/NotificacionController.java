@@ -3,8 +3,16 @@ package com.tuapp.msnotificaciones.controller;
 import com.tuapp.msnotificaciones.dto.NotificacionRequestDTO;
 import com.tuapp.msnotificaciones.dto.NotificacionResponseDTO;
 import com.tuapp.msnotificaciones.service.NotificacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,21 +23,10 @@ import java.util.List;
  * CONTROLADOR DE NOTIFICACIONES
  * ===========================================================
  *
- * Este controlador expone los servicios REST del microservicio
- * de notificaciones.
- *
- * Todas las peticiones realizadas desde Postman (o desde otro
- * microservicio como mspagos, mspedidos o msdelivery) llegan
- * primero a esta clase, la cual se encarga de recibir la
- * solicitud, validar los datos y delegar la lógica de negocio
- * al NotificacionService.
- *
  * Base URL del microservicio:
- *
  * http://localhost:8089/notificaciones
  *
  * Endpoints disponibles:
- *
  * POST    /notificaciones
  * GET     /notificaciones
  * GET     /notificaciones/{id}
@@ -37,12 +34,13 @@ import java.util.List;
  * PUT     /notificaciones/{id}/leida
  * DELETE  /notificaciones/{id}
  *
- * Todos los endpoints devuelven respuestas HTTP utilizando
- * ResponseEntity y pueden probarse fácilmente desde Postman.
+ * Documentación interactiva (Swagger UI):
+ * http://localhost:8089/swagger-ui/index.html
  */
 
 @RestController
 @RequestMapping("/notificaciones")
+@Tag(name = "Notificaciones", description = "Creación y gestión de notificaciones generadas por otros microservicios (pagos, pedidos, delivery).")
 public class NotificacionController {
 
     private final NotificacionService service;
@@ -51,64 +49,47 @@ public class NotificacionController {
         this.service = service;
     }
 
-    /**
-     * ===========================================================
-     * CREAR NOTIFICACIÓN
-     * ===========================================================
-     *
-     * Metodo HTTP:
-     * POST
-     *
-     * URL:
-     * http://localhost:8089/notificaciones
-     *
-     * POSTMAN
-     *
-     * Body -> raw -> JSON
-     *
-     * {
-     *   "usuarioId": 1,
-     *   "tipo": "PAGO_APROBADO",
-     *   "mensaje": "Tu pago fue aprobado exitosamente.",
-     *   "origen": "PAGOS",
-     *   "referenciaId": 10
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 201 CREATED
-     */
-
+    @Operation(summary = "Crear una notificación", description = "Registra una nueva notificación para un usuario, generada a partir de un evento de otro microservicio.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Notificación creada exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "usuarioId": 1,
+                              "tipo": "PAGO_APROBADO",
+                              "mensaje": "Tu pago fue aprobado exitosamente.",
+                              "origen": "PAGOS",
+                              "referenciaId": 10,
+                              "fechaEnvio": "2026-07-02T10:20:00",
+                              "leida": false
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+    })
     @PostMapping
-    public ResponseEntity<NotificacionResponseDTO> crear(@Valid @RequestBody NotificacionRequestDTO dto) {
+    public ResponseEntity<NotificacionResponseDTO> crear(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos de la notificación a crear", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "usuarioId": 1,
+                              "tipo": "PAGO_APROBADO",
+                              "mensaje": "Tu pago fue aprobado exitosamente.",
+                              "origen": "PAGOS",
+                              "referenciaId": 10
+                            }
+                            """)))
+            @Valid @RequestBody NotificacionRequestDTO dto) {
 
         NotificacionResponseDTO notificacion = service.crearNotificacion(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(notificacion);
     }
 
-    /**
-     * ===========================================================
-     * LISTAR NOTIFICACIONES
-     * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     * http://localhost:8089/notificaciones
-     *
-     * POSTMAN
-     *
-     * Seleccionar GET
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     */
-
+    @Operation(summary = "Listar notificaciones", description = "Retorna el listado completo de notificaciones registradas.")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping
     public ResponseEntity<List<NotificacionResponseDTO>> listar() {
 
@@ -116,121 +97,51 @@ public class NotificacionController {
 
     }
 
-    /**
-     * ===========================================================
-     * OBTENER NOTIFICACIÓN POR ID
-     * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     *
-     * http://localhost:8089/notificaciones/1
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si no existe:
-     *
-     * HTTP 404 NOT FOUND
-     */
-
+    @Operation(summary = "Obtener una notificación por ID", description = "Busca y retorna una notificación específica según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notificación encontrada"),
+            @ApiResponse(responseCode = "404", description = "La notificación no existe", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<NotificacionResponseDTO> obtener(@PathVariable Long id) {
+    public ResponseEntity<NotificacionResponseDTO> obtener(
+            @Parameter(description = "Identificador de la notificación", example = "1") @PathVariable Long id) {
 
         return ResponseEntity.ok(service.obtenerPorId(id));
 
     }
 
-    /**
-     * ===========================================================
-     * LISTAR NOTIFICACIONES POR USUARIO
-     * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     *
-     * http://localhost:8089/notificaciones/usuario/1
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     */
-
+    @Operation(summary = "Listar notificaciones de un usuario", description = "Retorna todas las notificaciones asociadas a un usuario específico.")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<NotificacionResponseDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
+    public ResponseEntity<List<NotificacionResponseDTO>> listarPorUsuario(
+            @Parameter(description = "Identificador del usuario", example = "1") @PathVariable Long usuarioId) {
 
         return ResponseEntity.ok(service.listarPorUsuario(usuarioId));
 
     }
 
-    /**
-     * ===========================================================
-     * MARCAR NOTIFICACIÓN COMO LEÍDA
-     * ===========================================================
-     *
-     * Metodo:
-     *
-     * PUT
-     *
-     * URL:
-     *
-     * http://localhost:8089/notificaciones/1/leida
-     *
-     * POSTMAN
-     *
-     * No requiere Body.
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si no existe:
-     *
-     * HTTP 404 NOT FOUND
-     *
-     * Si ya estaba leída:
-     *
-     * HTTP 400 BAD REQUEST
-     */
-
+    @Operation(summary = "Marcar notificación como leída", description = "Actualiza el estado de una notificación a leída.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Notificación marcada como leída"),
+            @ApiResponse(responseCode = "404", description = "La notificación no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "La notificación ya estaba leída", content = @Content)
+    })
     @PutMapping("/{id}/leida")
-    public ResponseEntity<NotificacionResponseDTO> marcarComoLeida(@PathVariable Long id) {
+    public ResponseEntity<NotificacionResponseDTO> marcarComoLeida(
+            @Parameter(description = "Identificador de la notificación", example = "1") @PathVariable Long id) {
 
         return ResponseEntity.ok(service.marcarComoLeida(id));
 
     }
 
-    /**
-     * ===========================================================
-     * ELIMINAR NOTIFICACIÓN
-     * ===========================================================
-     *
-     * Metodo:
-     *
-     * DELETE
-     *
-     * URL:
-     *
-     * http://localhost:8089/notificaciones/1
-     *
-     * POSTMAN
-     *
-     * Seleccionar DELETE
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 204 NO CONTENT
-     */
-
+    @Operation(summary = "Eliminar una notificación", description = "Elimina de forma permanente una notificación según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Notificación eliminada exitosamente", content = @Content),
+            @ApiResponse(responseCode = "404", description = "La notificación no existe", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "Identificador de la notificación", example = "1") @PathVariable Long id) {
 
         service.eliminar(id);
 

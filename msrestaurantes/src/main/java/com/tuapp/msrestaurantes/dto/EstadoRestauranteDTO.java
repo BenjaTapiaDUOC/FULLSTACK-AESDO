@@ -1,5 +1,6 @@
 package com.tuapp.msrestaurantes.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -16,14 +17,10 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Nuevo estado a asignar al restaurante.")
 public class EstadoRestauranteDTO {
 
-    /**
-     * Nuevo estado del restaurante.
-     *
-     * true  -> ACTIVO
-     * false -> INACTIVO
-     */
+    @Schema(description = "Nuevo estado del restaurante. true -> ACTIVO, false -> INACTIVO.", example = "false")
     @NotNull(message = "El campo 'activo' es obligatorio")
     private Boolean activo;
 

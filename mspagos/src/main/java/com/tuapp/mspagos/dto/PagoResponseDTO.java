@@ -1,5 +1,6 @@
 package com.tuapp.mspagos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -17,36 +18,25 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un pago registrado en el sistema.")
 public class PagoResponseDTO {
 
-    /**
-     * Identificador del pago.
-     */
+    @Schema(description = "Identificador del pago.", example = "1")
     private Long id;
 
-    /**
-     * Identificador del pedido asociado.
-     */
+    @Schema(description = "Identificador del pedido asociado.", example = "1")
     private Long pedidoId;
 
-    /**
-     * Monto del pago.
-     */
+    @Schema(description = "Monto del pago.", example = "15000")
     private Double monto;
 
-    /**
-     * Método de pago utilizado.
-     */
+    @Schema(description = "Método de pago utilizado.", example = "TARJETA")
     private String metodoPago;
 
-    /**
-     * Estado del pago (PENDIENTE, APROBADO, RECHAZADO).
-     */
+    @Schema(description = "Estado del pago.", example = "APROBADO", allowableValues = {"PENDIENTE", "APROBADO", "RECHAZADO"})
     private String estado;
 
-    /**
-     * Fecha y hora en que se registró el pago.
-     */
+    @Schema(description = "Fecha y hora en que se registró el pago.", example = "2026-07-02T10:15:30")
     private LocalDateTime fechaPago;
 
 }

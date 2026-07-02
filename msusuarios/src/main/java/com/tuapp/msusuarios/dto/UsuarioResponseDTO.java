@@ -1,5 +1,6 @@
 package com.tuapp.msusuarios.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,32 +16,19 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un usuario registrado en la plataforma.")
 public class UsuarioResponseDTO {
 
-    /**
-     * Identificador del usuario.
-     */
+    @Schema(description = "Identificador del usuario.", example = "1")
     private Long id;
 
-    /**
-     * Nombre del usuario.
-     */
+    @Schema(description = "Nombre del usuario.", example = "Benjamin")
     private String nombre;
 
-    /**
-     * Correo electrónico.
-     */
+    @Schema(description = "Correo electrónico.", example = "benjamin@gmail.com")
     private String email;
 
-    /**
-     * Contraseña.
-     *
-     * NOTA:
-     * Para una aplicación real NO debería enviarse.
-     *
-     * Se mantiene únicamente para los requerimientos
-     * académicos del proyecto.
-     */
+    @Schema(description = "Contraseña. NOTA: para una aplicación real NO debería enviarse; se mantiene únicamente para los requerimientos académicos del proyecto.", example = "12345678")
     private String password;
 
 }

@@ -1,5 +1,6 @@
 package com.tuapp.msautenticacion.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -21,35 +22,25 @@ import lombok.Data;
  */
 
 @Data
+@Schema(description = "Datos requeridos para registrar un nuevo usuario.")
 public class RegistroRequestDTO {
 
-    /**
-     * Nombre del usuario.
-     */
+    @Schema(description = "Nombre del usuario.", example = "Benjamin")
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
-    /**
-     * Correo electrónico.
-     */
+    @Schema(description = "Correo electrónico.", example = "benjamin@gmail.com")
     @NotBlank(message = "El correo es obligatorio")
     @Email(message = "Debe ingresar un correo válido")
     private String email;
 
-    /**
-     * Contraseña.
-     *
-     * Debe tener mínimo 8 caracteres.
-     */
+    @Schema(description = "Contraseña. Debe tener mínimo 8 caracteres.", example = "12345678")
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     private String password;
 
-    /**
-     * Rol solicitado para el usuario.
-     *
-     * Valores permitidos: ADMIN, CLIENTE, REPARTIDOR.
-     */
+    @Schema(description = "Rol solicitado para el usuario.", example = "CLIENTE",
+            allowableValues = {"ADMIN", "CLIENTE", "REPARTIDOR"})
     @NotBlank(message = "El rol es obligatorio")
     private String rol;
 

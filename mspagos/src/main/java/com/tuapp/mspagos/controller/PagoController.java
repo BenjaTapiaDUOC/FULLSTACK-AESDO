@@ -3,8 +3,16 @@ package com.tuapp.mspagos.controller;
 import com.tuapp.mspagos.dto.PagoRequestDTO;
 import com.tuapp.mspagos.dto.PagoResponseDTO;
 import com.tuapp.mspagos.service.PagoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,32 +23,23 @@ import java.util.List;
  * CONTROLADOR DE PAGOS
  * ===========================================================
  *
- * Este controlador expone los servicios REST del microservicio
- * de pagos.
- *
- * Todas las peticiones realizadas desde Postman llegan primero
- * a esta clase, la cual se encarga de recibir la solicitud,
- * validar los datos y delegar la lógica de negocio al
- * PagoService.
- *
  * Base URL del microservicio:
- *
  * http://localhost:8084/pagos
  *
  * Endpoints disponibles:
- *
  * POST    /pagos
  * GET     /pagos
  * GET     /pagos/{id}
  * PUT     /pagos/{id}
  * DELETE  /pagos/{id}
  *
- * Todos los endpoints devuelven respuestas HTTP utilizando
- * ResponseEntity y pueden probarse fácilmente desde Postman.
+ * Documentación interactiva (Swagger UI):
+ * http://localhost:8084/swagger-ui/index.html
  */
 
 @RestController
 @RequestMapping("/pagos")
+@Tag(name = "Pagos", description = "Procesamiento y gestión de los pagos asociados a los pedidos.")
 public class PagoController {
 
     private final PagoService service;
@@ -49,62 +48,43 @@ public class PagoController {
         this.service = service;
     }
 
-    /**
-     * ===========================================================
-     * CREAR / PROCESAR PAGO
-     * ===========================================================
-     *
-     * Metodo HTTP:
-     * POST
-     *
-     * URL:
-     * http://localhost:8084/pagos
-     *
-     * POSTMAN
-     *
-     * Body -> raw -> JSON
-     *
-     * {
-     *   "pedidoId":1,
-     *   "monto":15000,
-     *   "metodoPago":"TARJETA"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 201 CREATED
-     */
-
+    @Operation(summary = "Crear / procesar un pago", description = "Registra y procesa un nuevo pago asociado a un pedido existente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Pago creado exitosamente", content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    examples = @ExampleObject(value = """
+                            {
+                              "id": 1,
+                              "pedidoId": 1,
+                              "monto": 15000,
+                              "metodoPago": "TARJETA",
+                              "estado": "APROBADO",
+                              "fechaPago": "2026-07-02T10:15:30"
+                            }
+                            """)
+            )),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o pedido inexistente", content = @Content)
+    })
     @PostMapping
-    public ResponseEntity<PagoResponseDTO> crear(@Valid @RequestBody PagoRequestDTO dto) {
+    public ResponseEntity<PagoResponseDTO> crear(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Datos del pago a procesar", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "pedidoId": 1,
+                              "monto": 15000,
+                              "metodoPago": "TARJETA"
+                            }
+                            """)))
+            @Valid @RequestBody PagoRequestDTO dto) {
 
         PagoResponseDTO pago = service.crearPago(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(pago);
     }
 
-    /**
-     * ===========================================================
-     * LISTAR PAGOS
-     * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     * http://localhost:8084/pagos
-     *
-     * POSTMAN
-     *
-     * Seleccionar GET
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     */
-
+    @Operation(summary = "Listar pagos", description = "Retorna el listado completo de pagos registrados.")
+    @ApiResponse(responseCode = "200", description = "Listado obtenido exitosamente")
     @GetMapping
     public ResponseEntity<List<PagoResponseDTO>> listar() {
 
@@ -112,101 +92,51 @@ public class PagoController {
 
     }
 
-    /**
-     * ===========================================================
-     * OBTENER PAGO POR ID
-     * ===========================================================
-     *
-     * Metodo:
-     * GET
-     *
-     * URL:
-     *
-     * http://localhost:8084/pagos/1
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si no existe:
-     *
-     * HTTP 404 NOT FOUND
-     */
-
+    @Operation(summary = "Obtener un pago por ID", description = "Busca y retorna un pago específico según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pago encontrado"),
+            @ApiResponse(responseCode = "404", description = "El pago no existe", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<PagoResponseDTO> obtener(@PathVariable Long id) {
+    public ResponseEntity<PagoResponseDTO> obtener(
+            @Parameter(description = "Identificador del pago", example = "1") @PathVariable Long id) {
 
         return ResponseEntity.ok(service.obtenerPorId(id));
 
     }
 
-    /**
-     * ===========================================================
-     * ACTUALIZAR PAGO
-     * ===========================================================
-     *
-     * Metodo:
-     *
-     * PUT
-     *
-     * URL:
-     *
-     * http://localhost:8084/pagos/1
-     *
-     * POSTMAN
-     *
-     * Body -> JSON
-     *
-     * {
-     *   "pedidoId":1,
-     *   "monto":20000,
-     *   "metodoPago":"EFECTIVO"
-     * }
-     *
-     * Respuesta:
-     *
-     * HTTP 200 OK
-     *
-     * Si el pago ya fue aprobado:
-     *
-     * HTTP 400 BAD REQUEST
-     */
-
+    @Operation(summary = "Actualizar un pago", description = "Actualiza el monto y/o método de un pago existente. No permite modificar pagos ya aprobados.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pago actualizado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "El pago no existe", content = @Content),
+            @ApiResponse(responseCode = "400", description = "El pago ya fue aprobado y no puede modificarse", content = @Content)
+    })
     @PutMapping("/{id}")
     public ResponseEntity<PagoResponseDTO> actualizar(
-            @PathVariable Long id,
+            @Parameter(description = "Identificador del pago", example = "1") @PathVariable Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos del pago", required = true,
+                    content = @Content(examples = @ExampleObject(value = """
+                            {
+                              "pedidoId": 1,
+                              "monto": 20000,
+                              "metodoPago": "EFECTIVO"
+                            }
+                            """)))
             @Valid @RequestBody PagoRequestDTO dto) {
 
         return ResponseEntity.ok(service.actualizar(id, dto));
 
     }
 
-    /**
-     * ===========================================================
-     * ELIMINAR PAGO
-     * ===========================================================
-     *
-     * Metodo:
-     *
-     * DELETE
-     *
-     * URL:
-     *
-     * http://localhost:8084/pagos/1
-     *
-     * POSTMAN
-     *
-     * Seleccionar DELETE
-     *
-     * Presionar SEND
-     *
-     * Respuesta:
-     *
-     * HTTP 204 NO CONTENT
-     */
-
+    @Operation(summary = "Eliminar un pago", description = "Elimina de forma permanente un pago según su identificador.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Pago eliminado exitosamente", content = @Content),
+            @ApiResponse(responseCode = "404", description = "El pago no existe", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(
+            @Parameter(description = "Identificador del pago", example = "1") @PathVariable Long id) {
 
         service.eliminar(id);
 

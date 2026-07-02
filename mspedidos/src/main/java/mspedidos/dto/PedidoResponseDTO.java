@@ -1,5 +1,6 @@
 package mspedidos.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -19,36 +20,26 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Representa un pedido registrado en el sistema.")
 public class PedidoResponseDTO {
 
-    /**
-     * Identificador del pedido.
-     */
+    @Schema(description = "Identificador del pedido.", example = "1")
     private Long id;
 
-    /**
-     * Identificador del usuario dueño del pedido.
-     */
+    @Schema(description = "Identificador del usuario dueño del pedido.", example = "1")
     private Long usuarioId;
 
-    /**
-     * Monto total calculado del pedido.
-     */
+    @Schema(description = "Monto total calculado del pedido.", example = "24970.0")
     private Double total;
 
-    /**
-     * Estado actual del pedido.
-     */
+    @Schema(description = "Estado actual del pedido.", example = "PENDIENTE",
+            allowableValues = {"PENDIENTE", "EN_PROCESO", "ENVIADO", "ENTREGADO", "CANCELADO"})
     private String estado;
 
-    /**
-     * Fecha de creación del pedido.
-     */
+    @Schema(description = "Fecha de creación del pedido.", example = "2026-07-02T10:00:00")
     private LocalDateTime fechaCreacion;
 
-    /**
-     * Detalles (productos) que componen el pedido.
-     */
+    @Schema(description = "Detalles (productos) que componen el pedido.")
     private List<DetalleResponseDTO> detalles;
 
 }
