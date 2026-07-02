@@ -18,6 +18,7 @@
         <option value="$PROJECT_DIR$/mspedidos/pom.xml" />
         <option value="$PROJECT_DIR$/msproductos/pom.xml" />
         <option value="$PROJECT_DIR$/msnotificaciones/pom.xml" />
+        <option value="$PROJECT_DIR$/msgateway/pom.xml" />
       </list>
     </option>
   </component>

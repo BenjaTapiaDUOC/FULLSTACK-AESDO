@@ -28,12 +28,18 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.MsdeliveryApplication.executor": "Run",
+    "JUnit.AutenticacionServiceTest.executor": "Run",
     "JUnit.MsusuariosApplicationTests.executor": "Run",
+    "JUnit.PagoServiceTest.executor": "Run",
+    "JUnit.ProductoServiceTest.executor": "Run",
+    "JUnit.RestauranteServiceTest.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "Spring Boot.MsautenticacionApplication.executor": "Run",
     "Spring Boot.MsdeliveryApplication.executor": "Run",
+    "Spring Boot.MsgatewayApplication.executor": "Run",
     "Spring Boot.MsnotificacionesApplication.executor": "Run",
     "Spring Boot.MspagosApplication.executor": "Run",
     "Spring Boot.MspedidosApplication.executor": "Run",

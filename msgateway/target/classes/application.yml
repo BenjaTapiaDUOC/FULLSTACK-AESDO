@@ -1,0 +1,89 @@
+# ===========================================================
+# CONFIGURACION - MSGATEWAY (API Gateway)
+# ===========================================================
+# Este archivo centraliza el enrutamiento hacia los 10
+# microservicios del sistema. El cliente solo necesita conocer
+# la URL del gateway (http://localhost:8080) y una ruta logica
+# (ej: /usuarios/**); el gateway se encarga de reenviar la
+# peticion al puerto real del microservicio correspondiente.
+
+spring:
+  application:
+    name: msgateway
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+
+            - id: msusuarios
+              uri: ${MSUSUARIOS_URL:http://localhost:8081}
+              predicates:
+                - Path=/usuarios/**
+
+            - id: msproductos
+              uri: ${MSPRODUCTOS_URL:http://localhost:8082}
+              predicates:
+                - Path=/productos/**
+
+            - id: mspedidos
+              uri: ${MSPEDIDOS_URL:http://localhost:8083}
+              predicates:
+                - Path=/pedidos/**
+
+            - id: mspagos
+              uri: ${MSPAGOS_URL:http://localhost:8084}
+              predicates:
+                - Path=/pagos/**
+
+            - id: msdelivery
+              uri: ${MSDELIVERY_URL:http://localhost:8085}
+              predicates:
+                - Path=/delivery/**
+
+            - id: msrestaurantes
+              uri: ${MSRESTAURANTES_URL:http://localhost:8086}
+              predicates:
+                - Path=/restaurantes/**
+
+            - id: mspromociones
+              uri: ${MSPROMOCIONES_URL:http://localhost:8087}
+              predicates:
+                - Path=/promociones/**
+
+            - id: msrepartidores
+              uri: ${MSREPARTIDORES_URL:http://localhost:8088}
+              predicates:
+                - Path=/repartidores/**
+
+            - id: msnotificaciones
+              uri: ${MSNOTIFICACIONES_URL:http://localhost:8089}
+              predicates:
+                - Path=/notificaciones/**
+
+            - id: msautenticacion
+              uri: ${MSAUTENTICACION_URL:http://localhost:8090}
+              predicates:
+                - Path=/autenticacion/**
+
+# Puerto unico de entrada al sistema. Todo el trafico externo
+# pasa por aqui; los puertos 8081-8090 dejan de exponerse
+# directamente al cliente final.
+server:
+  port: 8080
+
+# Expone /actuator/health para verificar que el gateway esta arriba.
+# Configuración corregida para Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+  gateway:
+    mvc:
+      management:
+        enabled: true   # <--- ESTA ES LA PROPIEDAD CLAVE PARA WEBMVC
