@@ -1,0 +1,43 @@
+# ===========================================================
+# CONFIGURACION - MSNOTIFICACIONES
+# ===========================================================
+
+spring:
+  application:
+    name: msnotificaciones
+
+  # ==========================
+  # MYSQL (Laragon)
+  # ==========================
+  # Recuerda crear la base de datos antes de levantar el servicio:
+  # CREATE DATABASE msnotificaciones;
+  datasource:
+    url: jdbc:mysql://localhost:3306/msnotificaciones
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ==========================
+  # JPA
+  # ==========================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+# Puerto del microservicio
+server:
+  port: 8089
+
+# ==========================
+# COMUNICACION ENTRE MICROSERVICIOS
+# ==========================
+# URL base del microservicio de usuarios (msusuarios).
+# Se utiliza para validar que el usuarioId que llega en la
+# notificacion realmente exista antes de registrarla.
+msusuarios:
+  url: http://localhost:8081/usuarios
