@@ -1,0 +1,32 @@
+# ===========================================================
+# CONFIGURACION - MSUSUARIOS
+# ===========================================================
+
+spring:
+  application:
+    name: msusuarios
+
+  # ==========================
+  # MYSQL (Laragon)
+  # ==========================
+  datasource:
+    url: jdbc:mysql://localhost:3306/msusuarios
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ==========================
+  # JPA
+  # ==========================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+# Puerto del microservicio
+server:
+  port: 8081
