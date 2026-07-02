@@ -195,4 +195,129 @@ class PagoServiceTest {
 
         verify(repository, never()).deleteById(any());
     }
+
+    // ===========================================================
+    // TEST 6: crearPago() cuando la notificación a mspedidos
+    // falla (webClient.put() lanza excepción) debe propagar
+    // PagoException, aunque el pago ya haya quedado APROBADO
+    // y guardado.
+    // ===========================================================
+    @Test
+    void crearPago_conFalloAlNotificarPedido_debeLanzarPagoException() {
+
+        doNothing().when(pedidoClient).validarPedidoExiste(10L);
+
+        when(repository.save(any(Pago.class))).thenAnswer(inv -> {
+            Pago p = inv.getArgument(0);
+            p.setId(1L);
+            return p;
+        });
+
+        when(webClient.put()
+                .uri(anyString())
+                .retrieve()
+                .bodyToMono(Void.class))
+                .thenThrow(new RuntimeException("mspedidos no responde"));
+
+        assertThrows(
+                com.tuapp.mspagos.exception.PagoException.class,
+                () -> pagoService.crearPago(requestValido)
+        );
+
+        // El pago igual se guardó como APROBADO antes de notificar.
+        verify(repository, times(1)).save(any(Pago.class));
+    }
+
+    // ===========================================================
+    // TEST 7: listarPagos() debe mapear todos los pagos
+    // encontrados a DTOs.
+    // ===========================================================
+    @Test
+    void listarPagos_debeRetornarListaDeDTOs() {
+
+        Pago p1 = new Pago(1L, 10L, 15000.0, "TARJETA", "APROBADO", LocalDateTime.now());
+        Pago p2 = new Pago(2L, 11L, 5000.0, "EFECTIVO", "APROBADO", LocalDateTime.now());
+
+        when(repository.findAll()).thenReturn(java.util.List.of(p1, p2));
+
+        var respuesta = pagoService.listarPagos();
+
+        assertEquals(2, respuesta.size());
+        assertEquals(1L, respuesta.get(0).getId());
+        assertEquals(2L, respuesta.get(1).getId());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 8: listarPagos() sin pagos debe retornar lista vacía.
+    // ===========================================================
+    @Test
+    void listarPagos_sinPagos_debeRetornarListaVacia() {
+
+        when(repository.findAll()).thenReturn(java.util.List.of());
+
+        var respuesta = pagoService.listarPagos();
+
+        assertTrue(respuesta.isEmpty());
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 9: obtenerPorId() con un pago existente debe retornar
+    // el DTO correctamente mapeado.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conPagoExistente_debeRetornarDTO() {
+
+        Pago pago = new Pago(1L, 10L, 15000.0, "TARJETA", "APROBADO", LocalDateTime.now());
+
+        when(repository.findById(1L)).thenReturn(Optional.of(pago));
+
+        PagoResponseDTO respuesta = pagoService.obtenerPorId(1L);
+
+        assertNotNull(respuesta);
+        assertEquals(1L, respuesta.getId());
+        assertEquals("APROBADO", respuesta.getEstado());
+
+        verify(repository).findById(1L);
+    }
+
+    // ===========================================================
+    // TEST 10: actualizar() con un pago PENDIENTE (no aprobado)
+    // debe actualizar y guardar correctamente.
+    // ===========================================================
+    @Test
+    void actualizar_conPagoPendiente_debeActualizarCorrectamente() {
+
+        Pago pago = new Pago(1L, 10L, 15000.0, "TARJETA", "PENDIENTE", LocalDateTime.now());
+
+        PagoRequestDTO dto = new PagoRequestDTO();
+        dto.setPedidoId(10L);
+        dto.setMonto(20000.0);
+        dto.setMetodoPago("EFECTIVO");
+
+        when(repository.findById(1L)).thenReturn(Optional.of(pago));
+        when(repository.save(any(Pago.class))).thenAnswer(i -> i.getArgument(0));
+
+        PagoResponseDTO respuesta = pagoService.actualizar(1L, dto);
+
+        assertEquals(20000.0, respuesta.getMonto());
+        assertEquals("EFECTIVO", respuesta.getMetodoPago());
+
+        verify(repository).save(any(Pago.class));
+    }
+
+    // ===========================================================
+    // TEST 11: eliminar() con un pago existente debe eliminarlo.
+    // ===========================================================
+    @Test
+    void eliminar_conPagoExistente_debeEliminarPago() {
+
+        when(repository.existsById(1L)).thenReturn(true);
+
+        pagoService.eliminar(1L);
+
+        verify(repository).deleteById(1L);
+    }
 }
