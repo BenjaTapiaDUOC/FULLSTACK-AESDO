@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.List;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -164,4 +166,134 @@ class UsuarioServiceTest {
 
         verify(repository, never()).deleteById(any());
     }
+
+    @Test
+    void listarUsuarios_debeRetornarLista() {
+
+        Usuario u1 = new Usuario(1L, "Benjamin", "benjamin@gmail.com", "12345678");
+        Usuario u2 = new Usuario(2L, "Juan", "juan@gmail.com", "87654321");
+
+        when(repository.findAll()).thenReturn(List.of(u1, u2));
+
+        List<UsuarioResponseDTO> respuesta = usuarioService.listarUsuarios();
+
+        assertEquals(2, respuesta.size());
+
+        assertEquals("Benjamin", respuesta.get(0).getNombre());
+        assertEquals("Juan", respuesta.get(1).getNombre());
+
+        verify(repository).findAll();
+    }
+
+    @Test
+    void listarUsuarios_debeRetornarListaVacia() {
+
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<UsuarioResponseDTO> respuesta = usuarioService.listarUsuarios();
+
+        assertTrue(respuesta.isEmpty());
+
+        verify(repository).findAll();
+    }
+
+    @Test
+    void obtenerPorId_conIdExistente_debeRetornarUsuario() {
+
+        Usuario usuario =
+                new Usuario(1L,
+                        "Benjamin",
+                        "benjamin@gmail.com",
+                        "12345678");
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(usuario));
+
+        UsuarioResponseDTO respuesta = usuarioService.obtenerPorId(1L);
+
+        assertNotNull(respuesta);
+
+        assertEquals(1L, respuesta.getId());
+        assertEquals("Benjamin", respuesta.getNombre());
+        assertEquals("benjamin@gmail.com", respuesta.getEmail());
+
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void actualizar_conDatosValidos_debeActualizarUsuario() {
+
+        Usuario usuario =
+                new Usuario(1L,
+                        "Benjamin",
+                        "benjamin@gmail.com",
+                        "12345678");
+
+        UsuarioRequestDTO dto = new UsuarioRequestDTO();
+
+        dto.setNombre("Benja");
+
+        dto.setEmail("nuevo@gmail.com");
+
+        dto.setPassword("99999999");
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(usuario));
+
+        when(repository.existsByEmail("nuevo@gmail.com"))
+                .thenReturn(false);
+
+        when(repository.save(any(Usuario.class)))
+                .thenAnswer(i -> i.getArgument(0));
+
+        UsuarioResponseDTO respuesta =
+                usuarioService.actualizar(1L, dto);
+
+        assertEquals("Benja", respuesta.getNombre());
+
+        assertEquals("nuevo@gmail.com", respuesta.getEmail());
+
+        verify(repository).save(any(Usuario.class));
+    }
+
+    @Test
+    void eliminar_conIdExistente_debeEliminarUsuario() {
+
+        when(repository.existsById(1L)).thenReturn(true);
+
+        usuarioService.eliminar(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    @Test
+    void actualizar_conMismoCorreo_noDebeValidarDuplicado() {
+
+        Usuario usuario =
+                new Usuario(1L,
+                        "Benjamin",
+                        "benjamin@gmail.com",
+                        "12345678");
+
+        UsuarioRequestDTO dto = new UsuarioRequestDTO();
+
+        dto.setNombre("Benjamin 2");
+
+        dto.setEmail("benjamin@gmail.com");
+
+        dto.setPassword("87654321");
+
+        when(repository.findById(1L))
+                .thenReturn(Optional.of(usuario));
+
+        when(repository.save(any(Usuario.class)))
+                .thenAnswer(i -> i.getArgument(0));
+
+        usuarioService.actualizar(1L, dto);
+
+        verify(repository, never()).existsByEmail(any());
+
+        verify(repository).save(any(Usuario.class));
+    }
+
 }
