@@ -193,4 +193,129 @@ class PedidoServiceTest {
         assertEquals(1, respuesta.getDetalles().size());
         assertEquals(1000.0, respuesta.getDetalles().get(0).getSubtotal());
     }
+
+    // ===========================================================
+    // TEST 6: listarPedidos() debe mapear todos los pedidos
+    // encontrados a DTOs.
+    // ===========================================================
+    @Test
+    void listarPedidos_debeRetornarListaDeDTOs() {
+
+        Pedido p1 = new Pedido();
+        p1.setId(1L);
+        p1.setUsuarioId(1L);
+        p1.setEstado("PENDIENTE");
+        p1.setFechaCreacion(LocalDateTime.now());
+        p1.setTotal(0.0);
+
+        Pedido p2 = new Pedido();
+        p2.setId(2L);
+        p2.setUsuarioId(2L);
+        p2.setEstado("ENVIADO");
+        p2.setFechaCreacion(LocalDateTime.now());
+        p2.setTotal(0.0);
+
+        when(repository.findAll()).thenReturn(List.of(p1, p2));
+
+        List<PedidoResponseDTO> respuesta = pedidoService.listarPedidos();
+
+        assertEquals(2, respuesta.size());
+        assertEquals(1L, respuesta.get(0).getId());
+        assertEquals(2L, respuesta.get(1).getId());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 7: listarPedidos() sin pedidos debe retornar lista vacía.
+    // ===========================================================
+    @Test
+    void listarPedidos_sinPedidos_debeRetornarListaVacia() {
+
+        when(repository.findAll()).thenReturn(List.of());
+
+        List<PedidoResponseDTO> respuesta = pedidoService.listarPedidos();
+
+        assertTrue(respuesta.isEmpty());
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 8: listarPorUsuario() debe retornar solo los pedidos
+    // del usuario solicitado.
+    // ===========================================================
+    @Test
+    void listarPorUsuario_debeRetornarPedidosDelUsuario() {
+
+        Pedido pedido = new Pedido();
+        pedido.setId(1L);
+        pedido.setUsuarioId(7L);
+        pedido.setEstado("PENDIENTE");
+        pedido.setFechaCreacion(LocalDateTime.now());
+        pedido.setTotal(0.0);
+
+        when(repository.findByUsuarioId(7L)).thenReturn(List.of(pedido));
+
+        List<PedidoResponseDTO> respuesta = pedidoService.listarPorUsuario(7L);
+
+        assertEquals(1, respuesta.size());
+        assertEquals(7L, respuesta.get(0).getUsuarioId());
+
+        verify(repository).findByUsuarioId(7L);
+    }
+
+    // ===========================================================
+    // TEST 9: actualizarEstado() con datos válidos debe actualizar
+    // y guardar el pedido correctamente.
+    // ===========================================================
+    @Test
+    void actualizarEstado_conDatosValidos_debeActualizarPedido() {
+
+        Pedido pedido = new Pedido();
+        pedido.setId(1L);
+        pedido.setUsuarioId(1L);
+        pedido.setEstado("PENDIENTE");
+        pedido.setFechaCreacion(LocalDateTime.now());
+        pedido.setTotal(0.0);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(pedido));
+        when(repository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Se envía en minúscula para validar además que el service
+        // normaliza el estado con toUpperCase().
+        PedidoResponseDTO respuesta = pedidoService.actualizarEstado(1L, "enviado");
+
+        assertEquals("ENVIADO", respuesta.getEstado());
+        verify(repository).save(any(Pedido.class));
+    }
+
+    // ===========================================================
+    // TEST 10: eliminar() con un pedido existente debe eliminarlo.
+    // ===========================================================
+    @Test
+    void eliminar_conPedidoExistente_debeEliminarPedido() {
+
+        when(repository.existsById(1L)).thenReturn(true);
+
+        pedidoService.eliminar(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    // ===========================================================
+    // TEST 11: eliminar() con un pedido inexistente debe lanzar
+    // PedidoNotFoundException y no debe llamar a deleteById().
+    // ===========================================================
+    @Test
+    void eliminar_conPedidoInexistente_debeLanzarPedidoNotFoundException() {
+
+        when(repository.existsById(99L)).thenReturn(false);
+
+        assertThrows(
+                PedidoNotFoundException.class,
+                () -> pedidoService.eliminar(99L)
+        );
+
+        verify(repository, never()).deleteById(any());
+    }
 }
