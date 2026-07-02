@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -155,5 +156,112 @@ class ProductoServiceTest {
         );
 
         verify(repository, never()).deleteById(any());
+    }
+
+    // ===========================================================
+    // TEST 6: listarProductos() debe retornar el listado completo
+    // mapeado a DTO.
+    // ===========================================================
+    @Test
+    void listarProductos_debeRetornarListadoDeProductos() {
+
+        // GIVEN
+        Producto producto1 = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        Producto producto2 = new Producto(2L, "Hamburguesa Clasica", 6990.0, "Comida rapida");
+
+        when(repository.findAll()).thenReturn(List.of(producto1, producto2));
+
+        // WHEN
+        List<ProductoResponseDTO> resultado = productoService.listarProductos();
+
+        // THEN
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        assertEquals("Pizza Napolitana", resultado.get(0).getNombre());
+        assertEquals("Hamburguesa Clasica", resultado.get(1).getNombre());
+        verify(repository, times(1)).findAll();
+    }
+
+    // ===========================================================
+    // TEST 7: obtenerPorId() con un id existente debe retornar
+    // el producto mapeado a DTO.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conIdExistente_debeRetornarProducto() {
+
+        // GIVEN
+        Producto producto = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        when(repository.findById(1L)).thenReturn(Optional.of(producto));
+
+        // WHEN
+        ProductoResponseDTO respuesta = productoService.obtenerPorId(1L);
+
+        // THEN
+        assertNotNull(respuesta);
+        assertEquals(1L, respuesta.getId());
+        assertEquals("Pizza Napolitana", respuesta.getNombre());
+    }
+
+    // ===========================================================
+    // TEST 8: actualizar() con un nombre válido (sin cambiar de
+    // nombre o con uno libre) debe actualizar correctamente.
+    // ===========================================================
+    @Test
+    void actualizar_conDatosValidos_debeActualizarCorrectamente() {
+
+        // GIVEN
+        Producto productoExistente = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        when(repository.findById(1L)).thenReturn(Optional.of(productoExistente));
+        when(repository.save(any(Producto.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        ProductoRequestDTO dtoActualizado = new ProductoRequestDTO();
+        dtoActualizado.setNombre("Pizza Napolitana"); // mismo nombre, no debe validar duplicado
+        dtoActualizado.setPrecio(12990.0);
+        dtoActualizado.setCategoria("Comida rapida");
+
+        // WHEN
+        ProductoResponseDTO respuesta = productoService.actualizar(1L, dtoActualizado);
+
+        // THEN
+        assertNotNull(respuesta);
+        assertEquals(12990.0, respuesta.getPrecio());
+        verify(repository, times(1)).save(any(Producto.class));
+        verify(repository, never()).existsByNombreIgnoreCase(any());
+    }
+
+    // ===========================================================
+    // TEST 9: actualizar() con un id inexistente debe lanzar
+    // ProductoNotFoundException.
+    // ===========================================================
+    @Test
+    void actualizar_conIdInexistente_debeLanzarProductoNotFoundException() {
+
+        // GIVEN
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        // WHEN + THEN
+        assertThrows(
+                ProductoNotFoundException.class,
+                () -> productoService.actualizar(99L, requestValido)
+        );
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 10: eliminar() con un id existente debe eliminar
+    // correctamente el producto.
+    // ===========================================================
+    @Test
+    void eliminar_conIdExistente_debeEliminarCorrectamente() {
+
+        // GIVEN
+        when(repository.existsById(1L)).thenReturn(true);
+
+        // WHEN
+        productoService.eliminar(1L);
+
+        // THEN
+        verify(repository, times(1)).deleteById(1L);
     }
 }
