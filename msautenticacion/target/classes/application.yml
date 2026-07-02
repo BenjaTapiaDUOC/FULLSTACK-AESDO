@@ -1,0 +1,56 @@
+# ===========================================================
+# CONFIGURACION - MSAUTENTICACION
+# ===========================================================
+
+spring:
+  application:
+    name: msautenticacion
+
+  # ==========================
+  # MYSQL (Laragon)
+  # ==========================
+  # Recuerda crear la base de datos antes de levantar el servicio:
+  # CREATE DATABASE msautenticacion;
+  datasource:
+    url: jdbc:mysql://localhost:3306/msautenticacion
+    username: root
+    password: ""
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ==========================
+  # JPA
+  # ==========================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+# Puerto del microservicio
+server:
+  port: 8090
+
+# ==========================
+# COMUNICACION CON MSUSUARIOS
+# ==========================
+# URL base del microservicio msusuarios (puerto 8081).
+# Se utiliza mediante WebClient para crear el usuario
+# "maestro" durante el registro.
+msusuarios:
+  url: http://localhost:8081/usuarios
+
+# ==========================
+# JWT
+# ==========================
+# Secreto utilizado para firmar los tokens (HMAC-SHA256).
+# IMPORTANTE: en un entorno real este valor NO debe subirse
+# a un repositorio; aqui se deja fijo solo para fines
+# academicos/de evaluacion.
+jwt:
+  secret: "WeTAu3OspIapTeGjVenDEXgRvVFhZ0tLhigVuc0ivE63bK0d+DhRdAb0tJN+OF3QDNXrpPnqCcpY/DjqIeIYWA=="
+  # Tiempo de expiracion del token, en milisegundos.
+  # 3600000 ms = 1 hora
+  expiracion-ms: 3600000

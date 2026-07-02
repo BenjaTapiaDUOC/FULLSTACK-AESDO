@@ -16,6 +16,8 @@
         <option value="$PROJECT_DIR$/msautenticacion/pom.xml" />
         <option value="$PROJECT_DIR$/msusuarios/pom.xml" />
         <option value="$PROJECT_DIR$/mspedidos/pom.xml" />
+        <option value="$PROJECT_DIR$/msproductos/pom.xml" />
+        <option value="$PROJECT_DIR$/msnotificaciones/pom.xml" />
       </list>
     </option>
   </component>
