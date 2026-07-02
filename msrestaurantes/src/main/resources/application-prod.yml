@@ -1,0 +1,19 @@
+# ===========================================================
+# PERFIL PROD - MSRESTAURANTES (Render)
+# Se activa con la variable de entorno SPRING_PROFILES_ACTIVE=prod
+# No reemplaza application.yml (Laragon/MySQL); solo se usa en Render.
+# ===========================================================
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: ${PORT:8086}

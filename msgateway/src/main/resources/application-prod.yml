@@ -1,0 +1,10 @@
+# ===========================================================
+# PERFIL PROD - MSGATEWAY (Render)
+# Se activa con la variable de entorno SPRING_PROFILES_ACTIVE=prod
+# Las URLs de cada microservicio se toman de variables de entorno
+# (mismo mecanismo que ya usa application.yml, solo cambian los
+# valores por defecto de localhost a las URLs publicas de Render).
+# ===========================================================
+
+server:
+  port: ${PORT:8080}

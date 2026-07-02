@@ -95,19 +95,15 @@ public class JwtUtil {
      */
     public Claims validarToken(String token) {
         try {
-
-            return Jwts.parserBuilder()
-                    .setSigningKey(obtenerLlave())
+            return Jwts.parser()
+                    .verifyWith(obtenerLlave())
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
 
         } catch (Exception ex) {
-
             logger.warn("Token JWT inválido o expirado: {}", ex.getMessage());
-
             throw new TokenInvalidoException("El token es inválido o ha expirado.");
-
         }
     }
 
