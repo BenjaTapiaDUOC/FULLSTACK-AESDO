@@ -80,17 +80,19 @@ Cada microservicio mantiene su propia base de datos y su propio ciclo de vida
 | *msgateway* | *8080* | Punto de entrada único | — |
 
 ## Documentación Swagger
-- msusuarios: http://localhost:8081/swagger-ui/index.html
-- msproductos: http://localhost:8082/swagger-ui/index.html
-- mspedidos: http://localhost:8083/swagger-ui/index.html
-- mspagos: http://localhost:8084/swagger-ui/index.html
-- msdelivery: http://localhost:8085/swagger-ui/index.html
-- msrestaurantes: http://localhost:8086/swagger-ui/index.html
-- mspromociones: http://localhost:8087/swagger-ui/index.html
-- msrepartidores: http://localhost:8088/swagger-ui/index.html
-- msnotificaciones: http://localhost:8089/swagger-ui/index.html
-- msautenticacion: http://localhost:8090/swagger-ui/index.html
-- (Cuando esté el despliegue remoto: URLs de Railway/Render aquí)
+
+| Microservicio | Local | Remoto (Render) |
+|---|---|---|
+| msusuarios | http://localhost:8081/swagger-ui/index.html | https://msusuarios-x5gg.onrender.com/swagger-ui/index.html |
+| msproductos | http://localhost:8082/swagger-ui/index.html | https://msproductos.onrender.com/swagger-ui/index.html |
+| mspedidos | http://localhost:8083/swagger-ui/index.html | https://mspedidos.onrender.com/swagger-ui/index.html |
+| mspagos | http://localhost:8084/swagger-ui/index.html | https://mspagos.onrender.com/swagger-ui/index.html |
+| msdelivery | http://localhost:8085/swagger-ui/index.html | https://msdelivery.onrender.com/swagger-ui/index.html |
+| msrestaurantes | http://localhost:8086/swagger-ui/index.html | https://msrestaurantes.onrender.com/swagger-ui/index.html |
+| mspromociones | http://localhost:8087/swagger-ui/index.html | https://mspromociones.onrender.com/swagger-ui/index.html |
+| msrepartidores | http://localhost:8088/swagger-ui/index.html | https://msrepartidores.onrender.com/swagger-ui/index.html |
+| msnotificaciones | http://localhost:8089/swagger-ui/index.html | https://msnotificaciones.onrender.com/swagger-ui/index.html |
+| msautenticacion | http://localhost:8090/swagger-ui/index.html | https://msautenticacion.onrender.com/swagger-ui/index.html |
 
 ## Cómo ejecutar en local
 1. Clonar el repo
