@@ -17,8 +17,11 @@ msusuarios, y msproductos valida que el restaurante asociado exista y esté acti
 de crear un producto).
 
 ## Integrantes
-- Benjamin Tapia — [rol/microservicios a cargo]
-- Esteban Ramirez — [rol/microservicios a cargo]
+Benjamin Tapia — msusuarios, msproductos, mspedidos, mspagos, msdelivery. 
+Configuración del API Gateway (msgateway) y enrutamiento entre servicios.
+
+Esteban Ramirez — msautenticacion, msrestaurantes, mspromociones, msrepartidores, 
+msnotificaciones. Documentación técnica (Swagger/OpenAPI) y README del proyecto.
 
 ## Arquitectura general
 
