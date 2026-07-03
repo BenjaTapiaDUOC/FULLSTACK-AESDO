@@ -34,4 +34,9 @@ public class ProductoRequestDTO {
     @NotBlank(message = "La categoría es obligatoria")
     private String categoria;
 
+    @Schema(description = "Identificador del restaurante al que pertenece el producto. Debe existir y estar activo en msrestaurantes.", example = "1")
+    @NotNull(message = "El restauranteId es obligatorio")
+    @Positive(message = "El restauranteId debe ser mayor a 0")
+    private Long restauranteId;
+
 }

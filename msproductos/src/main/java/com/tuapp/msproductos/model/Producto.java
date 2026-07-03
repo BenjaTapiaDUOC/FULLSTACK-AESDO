@@ -51,4 +51,14 @@ public class Producto {
     @Column(nullable = false)
     private String categoria;
 
+    /**
+     * Identificador del restaurante al que pertenece el producto.
+     *
+     * Este dato se valida en tiempo real contra el microservicio
+     * msrestaurantes mediante WebClient: el restaurante debe
+     * existir y encontrarse activo antes de crear el producto.
+     */
+    @Column(nullable = false)
+    private Long restauranteId;
+
 }

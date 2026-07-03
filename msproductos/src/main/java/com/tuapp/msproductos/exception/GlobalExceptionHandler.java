@@ -54,6 +54,33 @@ public class GlobalExceptionHandler {
 
     /**
      * ===========================================================
+     * ERROR DE COMUNICACIÓN CON OTRO MICROSERVICIO
+     * ===========================================================
+     *
+     * Se lanza cuando msrestaurantes no responde o falla la
+     * comunicación (timeout, servicio caído, error inesperado).
+     *
+     * Respuesta HTTP:
+     *
+     * 503 SERVICE UNAVAILABLE
+     */
+
+    @ExceptionHandler(ServicioExternoException.class)
+    public ResponseEntity<Map<String, Object>> errorComunicacion(
+            ServicioExternoException ex) {
+
+        Map<String, Object> error = new HashMap<>();
+
+        error.put("codigo", 503);
+        error.put("error", "SERVICE UNAVAILABLE");
+        error.put("mensaje", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+
+    }
+
+    /**
+     * ===========================================================
      * ERROR DE REGLA DE NEGOCIO
      * ===========================================================
      *

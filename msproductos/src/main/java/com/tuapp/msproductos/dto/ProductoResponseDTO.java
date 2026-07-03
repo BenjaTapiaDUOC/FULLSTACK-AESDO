@@ -31,4 +31,7 @@ public class ProductoResponseDTO {
     @Schema(description = "Categoría del producto.", example = "Comida rápida")
     private String categoria;
 
+    @Schema(description = "Identificador del restaurante al que pertenece el producto.", example = "1")
+    private Long restauranteId;
+
 }

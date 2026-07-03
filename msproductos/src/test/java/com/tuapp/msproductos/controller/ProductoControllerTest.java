@@ -52,7 +52,8 @@ class ProductoControllerTest {
                 1L,
                 "Pizza Napolitana",
                 8990.0,
-                "Comida rápida"
+                "Comida rápida",
+                10L
         );
     }
 
@@ -66,6 +67,7 @@ class ProductoControllerTest {
         requestDTO.setNombre("Pizza Napolitana");
         requestDTO.setPrecio(8990.0);
         requestDTO.setCategoria("Comida rápida");
+        requestDTO.setRestauranteId(10L);
 
         when(service.crearProducto(any(ProductoRequestDTO.class))).thenReturn(responseDTO);
 
@@ -116,9 +118,10 @@ class ProductoControllerTest {
         requestDTO.setNombre("Pizza Napolitana Familiar");
         requestDTO.setPrecio(12990.0);
         requestDTO.setCategoria("Comida rápida");
+        requestDTO.setRestauranteId(10L);
 
         ProductoResponseDTO actualizado = new ProductoResponseDTO(
-                1L, "Pizza Napolitana Familiar", 12990.0, "Comida rápida"
+                1L, "Pizza Napolitana Familiar", 12990.0, "Comida rápida", 10L
         );
 
         when(service.actualizar(anyLong(), any(ProductoRequestDTO.class))).thenReturn(actualizado);

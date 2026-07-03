@@ -1,7 +1,9 @@
 package com.tuapp.msproductos.service;
 
+import com.tuapp.msproductos.client.RestauranteClient;
 import com.tuapp.msproductos.dto.ProductoRequestDTO;
 import com.tuapp.msproductos.dto.ProductoResponseDTO;
+import com.tuapp.msproductos.dto.RestauranteClienteDTO;
 import com.tuapp.msproductos.exception.BadRequestException;
 import com.tuapp.msproductos.exception.ProductoNotFoundException;
 import com.tuapp.msproductos.model.Producto;
@@ -36,9 +38,11 @@ public class ProductoService {
             LoggerFactory.getLogger(ProductoService.class);
 
     private final ProductoRepository repository;
+    private final RestauranteClient restauranteClient;
 
-    public ProductoService(ProductoRepository repository) {
+    public ProductoService(ProductoRepository repository, RestauranteClient restauranteClient) {
         this.repository = repository;
+        this.restauranteClient = restauranteClient;
     }
 
     /**
@@ -68,11 +72,26 @@ public class ProductoService {
 
         }
 
+        // Validación contra msrestaurantes: el restaurante debe existir
+        // y encontrarse activo antes de permitir la creación del producto.
+        RestauranteClienteDTO restaurante = restauranteClient.obtenerRestaurante(dto.getRestauranteId());
+
+        if (restaurante.getActivo() == null || !restaurante.getActivo()) {
+
+            logger.warn("El restaurante {} existe pero no está activo", dto.getRestauranteId());
+
+            throw new BadRequestException(
+                    "El restaurante con ID " + dto.getRestauranteId() + " no está activo."
+            );
+
+        }
+
         Producto producto = new Producto(
                 null,
                 dto.getNombre(),
                 dto.getPrecio(),
-                dto.getCategoria()
+                dto.getCategoria(),
+                dto.getRestauranteId()
         );
 
         Producto guardado = repository.save(producto);
@@ -154,6 +173,7 @@ public class ProductoService {
         producto.setNombre(dto.getNombre());
         producto.setPrecio(dto.getPrecio());
         producto.setCategoria(dto.getCategoria());
+        producto.setRestauranteId(dto.getRestauranteId());
 
         Producto actualizado = repository.save(producto);
 
@@ -195,7 +215,8 @@ public class ProductoService {
                 producto.getId(),
                 producto.getNombre(),
                 producto.getPrecio(),
-                producto.getCategoria()
+                producto.getCategoria(),
+                producto.getRestauranteId()
         );
     }
 

@@ -29,3 +29,11 @@ spring:
 # Puerto del microservicio
 server:
   port: 8082
+
+# ==========================
+# COMUNICACION ENTRE MICROSERVICIOS
+# ==========================
+# URL base del microservicio de restaurantes (msrestaurantes)
+# Se utiliza para validar que el restaurante del producto exista y esté activo.
+msrestaurantes:
+  url: http://localhost:8086

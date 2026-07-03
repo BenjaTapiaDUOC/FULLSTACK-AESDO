@@ -51,7 +51,7 @@ public class ProductoController {
         this.service = service;
     }
 
-    @Operation(summary = "Crear un producto", description = "Registra un nuevo producto en el catálogo.")
+    @Operation(summary = "Crear un producto", description = "Registra un nuevo producto en el catálogo. El restauranteId debe existir y estar activo en msrestaurantes (http://localhost:8086/restaurantes); si no existe o está inactivo, se responde HTTP 400.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Producto creado exitosamente", content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -60,11 +60,13 @@ public class ProductoController {
                               "id": 1,
                               "nombre": "Pizza Napolitana",
                               "precio": 8990,
-                              "categoria": "Comida rápida"
+                              "categoria": "Comida rápida",
+                              "restauranteId": 1
                             }
                             """)
             )),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Datos inválidos, o el restaurante no existe o no está activo", content = @Content),
+            @ApiResponse(responseCode = "503", description = "msrestaurantes no respondió", content = @Content)
     })
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> crear(
@@ -74,7 +76,8 @@ public class ProductoController {
                             {
                               "nombre": "Pizza Napolitana",
                               "precio": 8990,
-                              "categoria": "Comida rápida"
+                              "categoria": "Comida rápida",
+                              "restauranteId": 1
                             }
                             """)))
             @Valid @RequestBody ProductoRequestDTO dto) {
@@ -115,7 +118,8 @@ public class ProductoController {
                             {
                               "nombre": "Pizza Napolitana Familiar",
                               "precio": 12990,
-                              "categoria": "Comida rápida"
+                              "categoria": "Comida rápida",
+                              "restauranteId": 1
                             }
                             """)))
             @Valid @RequestBody ProductoRequestDTO dto) {

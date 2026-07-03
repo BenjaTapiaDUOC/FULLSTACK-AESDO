@@ -17,3 +17,6 @@ spring:
 
 server:
   port: ${PORT:8082}
+
+msrestaurantes:
+  url: ${MSRESTAURANTES_URL:http://localhost:8086}

@@ -1,7 +1,9 @@
 package com.tuapp.msproductos.service;
 
+import com.tuapp.msproductos.client.RestauranteClient;
 import com.tuapp.msproductos.dto.ProductoRequestDTO;
 import com.tuapp.msproductos.dto.ProductoResponseDTO;
+import com.tuapp.msproductos.dto.RestauranteClienteDTO;
 import com.tuapp.msproductos.exception.BadRequestException;
 import com.tuapp.msproductos.exception.ProductoNotFoundException;
 import com.tuapp.msproductos.model.Producto;
@@ -36,6 +38,9 @@ class ProductoServiceTest {
     @Mock
     private ProductoRepository repository;
 
+    @Mock
+    private RestauranteClient restauranteClient;
+
     @InjectMocks
     private ProductoService productoService;
 
@@ -47,6 +52,7 @@ class ProductoServiceTest {
         requestValido.setNombre("Pizza Napolitana");
         requestValido.setPrecio(8990.0);
         requestValido.setCategoria("Comida rapida");
+        requestValido.setRestauranteId(10L);
     }
 
     // ===========================================================
@@ -56,8 +62,15 @@ class ProductoServiceTest {
     @Test
     void crearProducto_conNombreNuevo_debeCrearProductoCorrectamente() {
 
-        // GIVEN
+        // GIVEN: el nombre no está repetido y el restaurante existe y está activo.
         when(repository.existsByNombreIgnoreCase("Pizza Napolitana")).thenReturn(false);
+
+        RestauranteClienteDTO restauranteActivo = new RestauranteClienteDTO();
+        restauranteActivo.setId(10L);
+        restauranteActivo.setNombre("La Trattoria");
+        restauranteActivo.setActivo(true);
+        when(restauranteClient.obtenerRestaurante(10L)).thenReturn(restauranteActivo);
+
         when(repository.save(any(Producto.class))).thenAnswer(invocacion -> {
             Producto p = invocacion.getArgument(0);
             p.setId(1L);
@@ -71,7 +84,59 @@ class ProductoServiceTest {
         assertNotNull(respuesta);
         assertEquals(1L, respuesta.getId());
         assertEquals(8990.0, respuesta.getPrecio());
+        assertEquals(10L, respuesta.getRestauranteId());
         verify(repository, times(1)).save(any(Producto.class));
+    }
+
+    // ===========================================================
+    // TEST 1b: crearProducto() cuando el restaurante NO existe en
+    // msrestaurantes debe lanzar BadRequestException y no debe
+    // guardar el producto.
+    // ===========================================================
+    @Test
+    void crearProducto_conRestauranteInexistente_debeLanzarBadRequestException() {
+
+        // GIVEN: el nombre no está repetido, pero el cliente reporta
+        // que el restaurante no existe (comportamiento ya validado en
+        // RestauranteClient, aquí solo se simula lo que el service ve).
+        when(repository.existsByNombreIgnoreCase("Pizza Napolitana")).thenReturn(false);
+        when(restauranteClient.obtenerRestaurante(10L))
+                .thenThrow(new BadRequestException("El restaurante con ID 10 no existe."));
+
+        // WHEN + THEN
+        assertThrows(
+                BadRequestException.class,
+                () -> productoService.crearProducto(requestValido)
+        );
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 1c: crearProducto() cuando el restaurante existe pero
+    // está INACTIVO debe lanzar BadRequestException y no debe
+    // guardar el producto.
+    // ===========================================================
+    @Test
+    void crearProducto_conRestauranteInactivo_debeLanzarBadRequestException() {
+
+        // GIVEN: el nombre no está repetido, el restaurante existe
+        // pero su estado "activo" es false.
+        when(repository.existsByNombreIgnoreCase("Pizza Napolitana")).thenReturn(false);
+
+        RestauranteClienteDTO restauranteInactivo = new RestauranteClienteDTO();
+        restauranteInactivo.setId(10L);
+        restauranteInactivo.setNombre("La Trattoria");
+        restauranteInactivo.setActivo(false);
+        when(restauranteClient.obtenerRestaurante(10L)).thenReturn(restauranteInactivo);
+
+        // WHEN + THEN
+        assertThrows(
+                BadRequestException.class,
+                () -> productoService.crearProducto(requestValido)
+        );
+
+        verify(repository, never()).save(any());
     }
 
     // ===========================================================
@@ -119,7 +184,7 @@ class ProductoServiceTest {
     void actualizar_conNombreYaUsadoPorOtroProducto_debeLanzarBadRequestException() {
 
         // GIVEN: el producto 1 existe, con su nombre actual.
-        Producto productoExistente = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        Producto productoExistente = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida", 10L);
         when(repository.findById(1L)).thenReturn(Optional.of(productoExistente));
 
         // Se intenta renombrar a un nombre que YA usa otro producto.
@@ -127,6 +192,7 @@ class ProductoServiceTest {
         dtoConNombreAjeno.setNombre("Hamburguesa Clasica");
         dtoConNombreAjeno.setPrecio(6990.0);
         dtoConNombreAjeno.setCategoria("Comida rapida");
+        dtoConNombreAjeno.setRestauranteId(10L);
 
         when(repository.existsByNombreIgnoreCase("Hamburguesa Clasica")).thenReturn(true);
 
@@ -166,8 +232,8 @@ class ProductoServiceTest {
     void listarProductos_debeRetornarListadoDeProductos() {
 
         // GIVEN
-        Producto producto1 = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
-        Producto producto2 = new Producto(2L, "Hamburguesa Clasica", 6990.0, "Comida rapida");
+        Producto producto1 = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida", 10L);
+        Producto producto2 = new Producto(2L, "Hamburguesa Clasica", 6990.0, "Comida rapida", 11L);
 
         when(repository.findAll()).thenReturn(List.of(producto1, producto2));
 
@@ -190,7 +256,7 @@ class ProductoServiceTest {
     void obtenerPorId_conIdExistente_debeRetornarProducto() {
 
         // GIVEN
-        Producto producto = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        Producto producto = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida", 10L);
         when(repository.findById(1L)).thenReturn(Optional.of(producto));
 
         // WHEN
@@ -210,7 +276,7 @@ class ProductoServiceTest {
     void actualizar_conDatosValidos_debeActualizarCorrectamente() {
 
         // GIVEN
-        Producto productoExistente = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida");
+        Producto productoExistente = new Producto(1L, "Pizza Napolitana", 8990.0, "Comida rapida", 10L);
         when(repository.findById(1L)).thenReturn(Optional.of(productoExistente));
         when(repository.save(any(Producto.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
 
@@ -218,6 +284,7 @@ class ProductoServiceTest {
         dtoActualizado.setNombre("Pizza Napolitana"); // mismo nombre, no debe validar duplicado
         dtoActualizado.setPrecio(12990.0);
         dtoActualizado.setCategoria("Comida rapida");
+        dtoActualizado.setRestauranteId(10L);
 
         // WHEN
         ProductoResponseDTO respuesta = productoService.actualizar(1L, dtoActualizado);
