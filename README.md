@@ -65,18 +65,8 @@ URL pública, perfil prod activado con SPRING_PROFILES_ACTIVE=prod]
 ## Pruebas unitarias
 - Framework: JUnit 5 + Mockito
 - Cobertura: Jacoco configurado en cada microservicio (mvn test genera reporte en /target/site/jacoco)
-- Cobertura actual: 
-[MSUSUARIOS: TEST 96%]
-[MSPRODUCTOS: TEST 84%]
-[MSPEDIDOS: TEST 99%]
-[MSPAGOS: TEST 95%]
-[MSDELIVERY: TEST 99%]
-[MSRESTAURANTES: TEST ]
-[MSPROMOCIONES: TEST 98%]
-[MSREPARTIDORES: TEST 92%]
-[MSNOTIFICACIONES: TEST 99%]
-[MSAUTENTICACION: TEST AUTENTICACION 94%]
-
+- Cobertura actual: MSUSUARIOS: TEST 96% | MSPRODUCTOS: TEST 84% | MSPEDIDOS: TEST 99% | MSPAGOS: TEST 95% | MSDELIVERY: TEST 99% | MSRESTAURANTES: TEST 98% | MSPROMOCIONES: TEST 98% | MSREPARTIDORES: TEST 92% | MSNOTIFICACIONES: TEST 99% | MSAUTENTICACION: TEST 94%
+  
 ## Gestión del proyecto
 - Tablero Trello: [https://trello.com/b/DWTveL6A/fullstack]
 - Commits distribuidos entre ambos integrantes (ver historial en main)
