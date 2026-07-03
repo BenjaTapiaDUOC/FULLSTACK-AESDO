@@ -94,6 +94,8 @@ Cada microservicio mantiene su propia base de datos y su propio ciclo de vida
 | msnotificaciones | http://localhost:8089/swagger-ui/index.html | https://msnotificaciones.onrender.com/swagger-ui/index.html |
 | msautenticacion | http://localhost:8090/swagger-ui/index.html | https://msautenticacion.onrender.com/swagger-ui/index.html |
 
+msgateway no expone Swagger propio: solo enruta hacia los microservicios de arriba. Para verificar que está operativo, usa https://msgateway.onrender.com/actuator/health.
+
 ## Cómo ejecutar en local
 1. Clonar el repo
 2. Requisitos: JDK 21, Maven, MySQL local (Laragon u otro)
