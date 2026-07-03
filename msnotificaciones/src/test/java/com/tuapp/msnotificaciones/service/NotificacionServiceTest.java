@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -205,5 +207,174 @@ class NotificacionServiceTest {
         );
 
         verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 7: crearNotificacion() con el origen en minúscula debe
+    // normalizarlo a mayúscula antes de guardar.
+    // ===========================================================
+    @Test
+    void crearNotificacion_conOrigenEnMinuscula_debeNormalizarYGuardar() {
+
+        notificacionRequestValida.setOrigen("pagos");
+
+        when(usuarioClient.existeUsuario(1L)).thenReturn(true);
+        when(repository.existsByUsuarioIdAndOrigenAndTipoAndReferenciaId(
+                1L, "PAGOS", "PAGO_APROBADO", 10L)).thenReturn(false);
+        when(repository.save(any(Notificacion.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        NotificacionResponseDTO respuesta = notificacionService.crearNotificacion(notificacionRequestValida);
+
+        assertEquals("PAGOS", respuesta.getOrigen());
+
+        verify(repository).existsByUsuarioIdAndOrigenAndTipoAndReferenciaId(
+                1L, "PAGOS", "PAGO_APROBADO", 10L);
+    }
+
+    // ===========================================================
+    // TEST 8: listarNotificaciones() con datos debe retornar la
+    // lista completa mapeada a DTO.
+    // ===========================================================
+    @Test
+    void listarNotificaciones_conDatos_debeRetornarListaCompleta() {
+
+        Notificacion n1 = new Notificacion(1L, 1L, "PAGO_APROBADO", "msj1", "PAGOS", 10L, LocalDateTime.now(), false);
+        Notificacion n2 = new Notificacion(2L, 2L, "PEDIDO_ENVIADO", "msj2", "PEDIDOS", 20L, LocalDateTime.now(), true);
+
+        when(repository.findAll()).thenReturn(List.of(n1, n2));
+
+        List<NotificacionResponseDTO> respuesta = notificacionService.listarNotificaciones();
+
+        assertEquals(2, respuesta.size());
+        assertEquals("PAGO_APROBADO", respuesta.get(0).getTipo());
+        assertEquals("PEDIDO_ENVIADO", respuesta.get(1).getTipo());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 9: listarNotificaciones() sin datos debe retornar una
+    // lista vacía.
+    // ===========================================================
+    @Test
+    void listarNotificaciones_sinDatos_debeRetornarListaVacia() {
+
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<NotificacionResponseDTO> respuesta = notificacionService.listarNotificaciones();
+
+        assertTrue(respuesta.isEmpty());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 10: listarPorUsuario() debe retornar únicamente las
+    // notificaciones del usuario solicitado.
+    // ===========================================================
+    @Test
+    void listarPorUsuario_debeRetornarNotificacionesDelUsuario() {
+
+        Notificacion n1 = new Notificacion(1L, 1L, "PAGO_APROBADO", "msj1", "PAGOS", 10L, LocalDateTime.now(), false);
+
+        when(repository.findByUsuarioId(1L)).thenReturn(List.of(n1));
+
+        List<NotificacionResponseDTO> respuesta = notificacionService.listarPorUsuario(1L);
+
+        assertEquals(1, respuesta.size());
+        assertEquals(1L, respuesta.get(0).getUsuarioId());
+
+        verify(repository).findByUsuarioId(1L);
+    }
+
+    // ===========================================================
+    // TEST 11: obtenerPorId() con un id existente debe retornar
+    // la notificación correspondiente.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conIdExistente_debeRetornarNotificacion() {
+
+        Notificacion notificacion = new Notificacion(
+                1L, 1L, "PAGO_APROBADO", "Tu pago fue aprobado.",
+                "PAGOS", 10L, LocalDateTime.now(), false
+        );
+
+        when(repository.findById(1L)).thenReturn(Optional.of(notificacion));
+
+        NotificacionResponseDTO respuesta = notificacionService.obtenerPorId(1L);
+
+        assertNotNull(respuesta);
+        assertEquals(1L, respuesta.getId());
+        assertEquals("PAGO_APROBADO", respuesta.getTipo());
+
+        verify(repository).findById(1L);
+    }
+
+    // ===========================================================
+    // TEST 12: obtenerPorId() con un id inexistente debe lanzar
+    // NotificacionNotFoundException.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conIdInexistente_debeLanzarNotFoundException() {
+
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                NotificacionNotFoundException.class,
+                () -> notificacionService.obtenerPorId(99L)
+        );
+    }
+
+    // ===========================================================
+    // TEST 13: marcarComoLeida() con una notificación no leída
+    // debe marcarla como leída correctamente.
+    // ===========================================================
+    @Test
+    void marcarComoLeida_conNotificacionNoLeida_debeMarcarComoLeida() {
+
+        Notificacion notificacion = new Notificacion(
+                1L, 1L, "PAGO_APROBADO", "Tu pago fue aprobado.",
+                "PAGOS", 10L, LocalDateTime.now(), false
+        );
+
+        when(repository.findById(1L)).thenReturn(Optional.of(notificacion));
+        when(repository.save(any(Notificacion.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        NotificacionResponseDTO respuesta = notificacionService.marcarComoLeida(1L);
+
+        assertTrue(respuesta.isLeida());
+
+        verify(repository).save(any(Notificacion.class));
+    }
+
+    // ===========================================================
+    // TEST 14: eliminar() con un id existente debe eliminar la
+    // notificación correctamente.
+    // ===========================================================
+    @Test
+    void eliminar_conIdExistente_debeEliminarNotificacion() {
+
+        when(repository.existsById(1L)).thenReturn(true);
+
+        notificacionService.eliminar(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    // ===========================================================
+    // TEST 15: eliminar() con un id inexistente debe lanzar
+    // NotificacionNotFoundException y no debe intentar eliminar.
+    // ===========================================================
+    @Test
+    void eliminar_conIdInexistente_debeLanzarNotFoundException() {
+
+        when(repository.existsById(99L)).thenReturn(false);
+
+        assertThrows(
+                NotificacionNotFoundException.class,
+                () -> notificacionService.eliminar(99L)
+        );
+
+        verify(repository, never()).deleteById(any());
     }
 }
