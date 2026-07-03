@@ -21,7 +21,44 @@ de crear un producto).
 - Esteban Ramirez — [rol/microservicios a cargo]
 
 ## Arquitectura general
-[Diagrama simple o descripción: cliente → Gateway (puerto 8080) → 10 microservicios]
+
+El cliente (Postman, frontend o cualquier consumidor externo) interactúa con el sistema 
+a través de un único punto de entrada: el **API Gateway (msgateway, puerto 8080)**. 
+El Gateway enruta cada solicitud al microservicio correspondiente según el prefijo de la 
+ruta (ej. `/usuarios/**` → msusuarios), por lo que los microservicios no se exponen 
+directamente al exterior.
+
+Cada microservicio gestiona su propio dominio de forma independiente y, cuando es 
+necesario, se comunica con otros microservicios vía REST (WebClient/Feign) para validar 
+o enriquecer información — por ejemplo, mspedidos consulta a msusuarios para validar 
+que el usuario exista, y msproductos consulta a msrestaurantes para validar que el 
+restaurante asociado esté activo.
+
+                              ┌────────────────────┐
+                              │      Cliente        │
+                              │ (Postman / Frontend) │
+                              └──────────┬───────────┘
+                                         │
+                                         ▼
+                              ┌────────────────────┐
+                              │   msgateway :8080    │
+                              │   API Gateway        │
+                              └──────────┬───────────┘
+                ┌────────────┬───────────┼────────────┬─────────────┐
+                ▼            ▼           ▼            ▼             ▼
+          msusuarios   msautenticacion mspedidos   msproductos  mspagos
+            :8081          :8090        :8083        :8082      :8084
+                │                          │            │
+                │                          ▼            ▼
+                │                    msrestaurantes  mspromociones
+                │                        :8086          :8087
+                ▼
+          msdelivery ──── msrepartidores ──── msnotificaciones
+            :8085             :8088                :8089
+
+Cada microservicio mantiene su propia base de datos y su propio ciclo de vida 
+(despliegue, tests y documentación Swagger independientes), siguiendo el principio de 
+**independencia de despliegue** propio de una arquitectura de microservicios.
 
 ## Microservicios implementados
 
