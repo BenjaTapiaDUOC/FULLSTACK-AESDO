@@ -41,8 +41,15 @@ de crear un producto).
 
 ## Documentación Swagger
 - msusuarios: http://localhost:8081/swagger-ui/index.html
+- msproductos: http://localhost:8082/swagger-ui/index.html
 - mspedidos: http://localhost:8083/swagger-ui/index.html
-- [... resto de servicios]
+- mspagos: http://localhost:8084/swagger-ui/index.html
+- msdelivery: http://localhost:8085/swagger-ui/index.html
+- msrestaurantes: http://localhost:8086/swagger-ui/index.html
+- mspromociones: http://localhost:8087/swagger-ui/index.html
+- msrepartidores: http://localhost:8088/swagger-ui/index.html
+- msnotificaciones: http://localhost:8089/swagger-ui/index.html
+- msautenticacion: http://localhost:8090/swagger-ui/index.html
 - (Cuando esté el despliegue remoto: URLs de Railway/Render aquí)
 
 ## Cómo ejecutar en local
