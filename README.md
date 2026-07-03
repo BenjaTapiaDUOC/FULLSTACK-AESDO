@@ -1,12 +1,12 @@
-# 🍔 [Nombre del proyecto] — Arquitectura de Microservicios
+# 🍔 AESDO — Arquitectura de Microservicios
 
 ## Descripción del proyecto
 [Contexto/dominio: delivery de comida, gestión de pedidos, pagos, etc.
 2-4 líneas explicando el problema que resuelve el sistema.]
 
 ## Integrantes
-- Nombre Apellido — [rol/microservicios a cargo]
-- Nombre Apellido — [rol/microservicios a cargo]
+- Benjamin Tapia — [rol/microservicios a cargo]
+- Esteban Ramirez — [rol/microservicios a cargo]
 
 ## Arquitectura general
 [Diagrama simple o descripción: cliente → Gateway (puerto 8080) → 10 microservicios]
@@ -35,7 +35,7 @@
 
 ## Cómo ejecutar en local
 1. Clonar el repo
-2. Requisitos: JDK 17+, Maven, MySQL local (Laragon u otro)
+2. Requisitos: JDK 21, Maven, MySQL local (Laragon u otro)
 3. Por cada microservicio: mvn spring-boot:run (o correr el jar)
 4. El gateway queda expuesto en http://localhost:8080
 
@@ -49,5 +49,5 @@ URL pública, perfil prod activado con SPRING_PROFILES_ACTIVE=prod]
 - Cobertura actual: [completar con el % real una vez corran el reporte]
 
 ## Gestión del proyecto
-- Tablero Trello: [link]
+- Tablero Trello: [https://trello.com/b/DWTveL6A/fullstack]
 - Commits distribuidos entre ambos integrantes (ver historial en main)
