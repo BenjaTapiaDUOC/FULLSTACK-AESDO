@@ -99,8 +99,12 @@ Cada microservicio mantiene su propia base de datos y su propio ciclo de vida
 4. El gateway queda expuesto en http://localhost:8080
 
 ## Cómo ejecutar en remoto
-[Completar cuando esté el despliegue: variables de entorno necesarias,
-URL pública, perfil prod activado con SPRING_PROFILES_ACTIVE=prod]
+Todos los microservicios están desplegados en Render (contenedores Docker, región Oregon).
+
+Variable de entorno SPRING_PROFILES_ACTIVE=prod activa application-prod.yml en cada servicio.
+Cada servicio expone su propia URL pública de Render (ver tabla en "Documentación Swagger").
+El API Gateway apunta a los demás microservicios mediante variables de entorno (MSUSUARIOS_URL, MSPRODUCTOS_URL, etc.) configuradas en el dashboard de Render con las URLs públicas de cada uno.
+No requiere instalación: basta con acceder a la URL pública de cada servicio o a la del Gateway.
 
 ## Pruebas unitarias
 - Framework: JUnit 5 + Mockito
