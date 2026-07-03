@@ -1,8 +1,20 @@
 # 🍔 AESDO — Arquitectura de Microservicios
 
 ## Descripción del proyecto
-[Contexto/dominio: delivery de comida, gestión de pedidos, pagos, etc.
-2-4 líneas explicando el problema que resuelve el sistema.]
+Este proyecto es una plataforma de **delivery de comida** basada en arquitectura de 
+microservicios, que permite a un usuario registrarse, autenticarse, explorar restaurantes 
+y sus productos, generar pedidos, procesar pagos, aplicar promociones y hacer seguimiento 
+de la entrega hasta que un repartidor la complete.
+
+El sistema está compuesto por 10 microservicios independientes (usuarios, autenticación, 
+restaurantes, productos, pedidos, pagos, promociones, delivery, repartidores y 
+notificaciones), comunicados entre sí vía REST y centralizados a través de un API Gateway 
+(msgateway), que expone un único punto de entrada al cliente.
+
+Cada microservicio gestiona su propio dominio y valida información contra otros servicios 
+cuando corresponde (por ejemplo, mspedidos valida la existencia del usuario contra 
+msusuarios, y msproductos valida que el restaurante asociado exista y esté activo antes 
+de crear un producto).
 
 ## Integrantes
 - Benjamin Tapia — [rol/microservicios a cargo]
