@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -224,6 +226,285 @@ class PromocionServiceTest {
         );
 
         assertEquals("El cupón ya fue utilizado o se encuentra inactivo.", ex.getMessage());
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 8: listarPromociones() con datos debe retornar la
+    // lista completa mapeada a DTO.
+    // ===========================================================
+    @Test
+    void listarPromociones_conDatos_debeRetornarListaCompleta() {
+
+        Promocion p1 = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+        Promocion p2 = new Promocion(2L, "INVIERNO2026", 10.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        when(repository.findAll()).thenReturn(List.of(p1, p2));
+
+        List<PromocionResponseDTO> respuesta = promocionService.listarPromociones();
+
+        assertEquals(2, respuesta.size());
+        assertEquals("VERANO2026", respuesta.get(0).getCodigo());
+        assertEquals("INVIERNO2026", respuesta.get(1).getCodigo());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 9: listarPromociones() sin datos debe retornar una
+    // lista vacía.
+    // ===========================================================
+    @Test
+    void listarPromociones_sinDatos_debeRetornarListaVacia() {
+
+        when(repository.findAll()).thenReturn(Collections.emptyList());
+
+        List<PromocionResponseDTO> respuesta = promocionService.listarPromociones();
+
+        assertTrue(respuesta.isEmpty());
+
+        verify(repository).findAll();
+    }
+
+    // ===========================================================
+    // TEST 10: obtenerPorId() con un id existente debe retornar
+    // la promoción correspondiente.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conIdExistente_debeRetornarPromocion() {
+
+        Promocion promocion = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(promocion));
+
+        PromocionResponseDTO respuesta = promocionService.obtenerPorId(1L);
+
+        assertNotNull(respuesta);
+        assertEquals(1L, respuesta.getId());
+        assertEquals("VERANO2026", respuesta.getCodigo());
+
+        verify(repository).findById(1L);
+    }
+
+    // ===========================================================
+    // TEST 11: obtenerPorId() con un id inexistente debe lanzar
+    // PromocionNotFoundException.
+    // ===========================================================
+    @Test
+    void obtenerPorId_conIdInexistente_debeLanzarPromocionNotFoundException() {
+
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromocionNotFoundException.class,
+                () -> promocionService.obtenerPorId(99L)
+        );
+    }
+
+    // ===========================================================
+    // TEST 12: actualizar() con datos válidos debe actualizar
+    // correctamente la promoción existente.
+    // ===========================================================
+    @Test
+    void actualizar_conDatosValidos_debeActualizarPromocion() {
+
+        Promocion promocionExistente = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        PromocionRequestDTO dto = new PromocionRequestDTO();
+        dto.setCodigo("VERANO2026");
+        dto.setPorcentajeDescuento(20.0);
+        dto.setFechaInicio(LocalDate.now().minusDays(1));
+        dto.setFechaFin(LocalDate.now().plusDays(60));
+        dto.setActivo(true);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(promocionExistente));
+        when(repository.save(any(Promocion.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        PromocionResponseDTO respuesta = promocionService.actualizar(1L, dto);
+
+        assertEquals(20.0, respuesta.getPorcentajeDescuento());
+        assertEquals(dto.getFechaFin(), respuesta.getFechaFin());
+
+        verify(repository).save(any(Promocion.class));
+    }
+
+    // ===========================================================
+    // TEST 13: actualizar() con un id inexistente debe lanzar
+    // PromocionNotFoundException.
+    // ===========================================================
+    @Test
+    void actualizar_conIdInexistente_debeLanzarPromocionNotFoundException() {
+
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromocionNotFoundException.class,
+                () -> promocionService.actualizar(99L, promocionRequestValida)
+        );
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 14: actualizar() con un código que ya pertenece a OTRA
+    // promoción debe lanzar BadRequestException.
+    // ===========================================================
+    @Test
+    void actualizar_conCodigoYaUsadoPorOtraPromocion_debeLanzarBadRequestException() {
+
+        Promocion promocionExistente = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        PromocionRequestDTO dtoConCodigoAjeno = new PromocionRequestDTO();
+        dtoConCodigoAjeno.setCodigo("INVIERNO2026");
+        dtoConCodigoAjeno.setPorcentajeDescuento(20.0);
+        dtoConCodigoAjeno.setFechaInicio(LocalDate.now().minusDays(1));
+        dtoConCodigoAjeno.setFechaFin(LocalDate.now().plusDays(30));
+
+        when(repository.findById(1L)).thenReturn(Optional.of(promocionExistente));
+        when(repository.existsByCodigo("INVIERNO2026")).thenReturn(true);
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> promocionService.actualizar(1L, dtoConCodigoAjeno)
+        );
+
+        assertEquals("El código ya pertenece a otra promoción.", ex.getMessage());
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 15: actualizar() con el mismo código no debe validar
+    // duplicado (no debe llamar a existsByCodigo).
+    // ===========================================================
+    @Test
+    void actualizar_conMismoCodigo_noDebeValidarDuplicado() {
+
+        Promocion promocionExistente = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(promocionExistente));
+        when(repository.save(any(Promocion.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
+
+        promocionService.actualizar(1L, promocionRequestValida);
+
+        verify(repository, never()).existsByCodigo(any());
+        verify(repository).save(any(Promocion.class));
+    }
+
+    // ===========================================================
+    // TEST 16: actualizar() con fechas incoherentes debe lanzar
+    // BadRequestException.
+    // ===========================================================
+    @Test
+    void actualizar_conFechasIncoherentes_debeLanzarBadRequestException() {
+
+        Promocion promocionExistente = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        promocionRequestValida.setFechaInicio(LocalDate.now());
+        promocionRequestValida.setFechaFin(LocalDate.now().minusDays(5));
+
+        when(repository.findById(1L)).thenReturn(Optional.of(promocionExistente));
+
+        assertThrows(
+                BadRequestException.class,
+                () -> promocionService.actualizar(1L, promocionRequestValida)
+        );
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 17: eliminar() con un id existente debe eliminar la
+    // promoción correctamente.
+    // ===========================================================
+    @Test
+    void eliminar_conIdExistente_debeEliminarPromocion() {
+
+        when(repository.existsById(1L)).thenReturn(true);
+
+        promocionService.eliminar(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    // ===========================================================
+    // TEST 18: eliminar() con un id inexistente debe lanzar
+    // PromocionNotFoundException y no debe intentar eliminar.
+    // ===========================================================
+    @Test
+    void eliminar_conIdInexistente_debeLanzarPromocionNotFoundException() {
+
+        when(repository.existsById(99L)).thenReturn(false);
+
+        assertThrows(
+                PromocionNotFoundException.class,
+                () -> promocionService.eliminar(99L)
+        );
+
+        verify(repository, never()).deleteById(any());
+    }
+
+    // ===========================================================
+    // TEST 19: validarCupon() con un cupón vigente y activo debe
+    // retornar el DTO sin modificar su estado.
+    // ===========================================================
+    @Test
+    void validarCupon_conCuponVigente_debeRetornarPromocionSinModificar() {
+
+        Promocion promocionVigente = new Promocion(1L, "VERANO2026", 15.0,
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(30), true);
+
+        when(repository.findByCodigo("VERANO2026")).thenReturn(Optional.of(promocionVigente));
+
+        PromocionResponseDTO respuesta = promocionService.validarCupon("VERANO2026");
+
+        assertNotNull(respuesta);
+        assertTrue(respuesta.getActivo());
+
+        verify(repository, never()).save(any());
+    }
+
+    // ===========================================================
+    // TEST 20: validarCupon() con un cupón que aún no está
+    // vigente debe lanzar BadRequestException.
+    // ===========================================================
+    @Test
+    void validarCupon_conCuponAunNoVigente_debeLanzarBadRequestException() {
+
+        Promocion promocionFutura = new Promocion(1L, "PRIMAVERA2027", 10.0,
+                LocalDate.now().plusDays(10), LocalDate.now().plusDays(40), true);
+
+        when(repository.findByCodigo("PRIMAVERA2027")).thenReturn(Optional.of(promocionFutura));
+
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
+                () -> promocionService.validarCupon("PRIMAVERA2027")
+        );
+
+        assertEquals("El cupón aún no se encuentra vigente.", ex.getMessage());
+    }
+
+    // ===========================================================
+    // TEST 21: aplicarCupon() con un código inexistente debe
+    // lanzar PromocionNotFoundException y no debe guardar.
+    // ===========================================================
+    @Test
+    void aplicarCupon_conCodigoInexistente_debeLanzarPromocionNotFoundException() {
+
+        when(repository.findByCodigo("NOEXISTE")).thenReturn(Optional.empty());
+
+        assertThrows(
+                PromocionNotFoundException.class,
+                () -> promocionService.aplicarCupon("NOEXISTE")
+        );
 
         verify(repository, never()).save(any());
     }
