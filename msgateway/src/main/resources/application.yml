@@ -5,7 +5,13 @@
 # microservicios del sistema. El cliente solo necesita conocer
 # la URL del gateway (http://localhost:8080) y una ruta logica
 # (ej: /usuarios/**); el gateway se encarga de reenviar la
-# peticion al puerto real del microservicio correspondiente.
+# peticion al servicio correspondiente.
+#
+# Las rutas ya NO apuntan a localhost:PUERTO fijo: usan el
+# esquema lb:// (load balanced) + el nombre logico registrado
+# en mseureka (spring.application.name de cada microservicio).
+# Spring Cloud LoadBalancer consulta a Eureka en tiempo real
+# para saber en que host/puerto esta corriendo cada uno.
 
 spring:
   application:
@@ -18,52 +24,52 @@ spring:
           routes:
 
             - id: msusuarios
-              uri: ${MSUSUARIOS_URL:http://localhost:8081}
+              uri: lb://msusuarios
               predicates:
                 - Path=/usuarios/**
 
             - id: msproductos
-              uri: ${MSPRODUCTOS_URL:http://localhost:8082}
+              uri: lb://msproductos
               predicates:
                 - Path=/productos/**
 
             - id: mspedidos
-              uri: ${MSPEDIDOS_URL:http://localhost:8083}
+              uri: lb://mspedidos
               predicates:
                 - Path=/pedidos/**
 
             - id: mspagos
-              uri: ${MSPAGOS_URL:http://localhost:8084}
+              uri: lb://mspagos
               predicates:
                 - Path=/pagos/**
 
             - id: msdelivery
-              uri: ${MSDELIVERY_URL:http://localhost:8085}
+              uri: lb://msdelivery
               predicates:
                 - Path=/delivery/**
 
             - id: msrestaurantes
-              uri: ${MSRESTAURANTES_URL:http://localhost:8086}
+              uri: lb://msrestaurantes
               predicates:
                 - Path=/restaurantes/**
 
             - id: mspromociones
-              uri: ${MSPROMOCIONES_URL:http://localhost:8087}
+              uri: lb://mspromociones
               predicates:
                 - Path=/promociones/**
 
             - id: msrepartidores
-              uri: ${MSREPARTIDORES_URL:http://localhost:8088}
+              uri: lb://msrepartidores
               predicates:
                 - Path=/repartidores/**
 
             - id: msnotificaciones
-              uri: ${MSNOTIFICACIONES_URL:http://localhost:8089}
+              uri: lb://msnotificaciones
               predicates:
                 - Path=/notificaciones/**
 
             - id: msautenticacion
-              uri: ${MSAUTENTICACION_URL:http://localhost:8090}
+              uri: lb://msautenticacion
               predicates:
                 - Path=/autenticacion/**
 
@@ -72,6 +78,19 @@ spring:
 # directamente al cliente final.
 server:
   port: 8080
+
+# ==========================
+# EUREKA CLIENT
+# ==========================
+# El gateway también se registra en mseureka y, sobre todo,
+# CONSULTA el registro para resolver las URIs lb:// de las
+# rutas de arriba.
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
 
 # Expone /actuator/health para verificar que el gateway esta arriba.
 # Configuración corregida para Actuator

@@ -1,0 +1,33 @@
+# ===========================================================
+# CONFIGURACION - MSEUREKA (Servidor de descubrimiento)
+# ===========================================================
+# Este microservicio no expone lógica de negocio: solo
+# mantiene el registro de instancias activas del sistema.
+# Debe ser el PRIMER microservicio en levantarse.
+
+spring:
+  application:
+    name: mseureka
+
+server:
+  port: 8761
+
+eureka:
+  client:
+    # El servidor no necesita registrarse a sí mismo ni
+    # consultar el registro, ya que él ES el registro.
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Reduce el tiempo de espera para desarrollo local; en
+    # producción real conviene dejar los valores por defecto.
+    enable-self-preservation: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

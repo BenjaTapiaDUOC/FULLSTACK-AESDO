@@ -34,13 +34,26 @@ server:
   port: 8090
 
 # ==========================
+# EUREKA CLIENT
+# ==========================
+# Registra este microservicio en mseureka (localhost:8761)
+# usando spring.application.name como identificador logico.
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# ==========================
 # COMUNICACION CON MSUSUARIOS
 # ==========================
 # URL base del microservicio msusuarios (puerto 8081).
 # Se utiliza mediante WebClient para crear el usuario
 # "maestro" durante el registro.
+# lb:// -> se resuelve vía Eureka (Spring Cloud LoadBalancer).
 msusuarios:
-  url: http://localhost:8081/usuarios
+  url: lb://msusuarios/usuarios
 
 # ==========================
 # JWT

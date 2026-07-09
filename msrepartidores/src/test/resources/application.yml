@@ -1,0 +1,10 @@
+# ===========================================================
+# CONFIGURACION DE TEST - EUREKA DESACTIVADO
+# ===========================================================
+# Durante los tests (mvn test) no queremos que el contexto
+# intente registrarse ni consultar un Eureka real: se
+# desactiva el cliente para que los tests corran rapido y
+# sin depender de mseureka estar levantado.
+eureka:
+  client:
+    enabled: false

@@ -30,3 +30,15 @@ spring:
 # Puerto del microservicio
 server:
   port: 8081
+
+# ==========================
+# EUREKA CLIENT
+# ==========================
+# Registra este microservicio en mseureka (localhost:8761)
+# usando spring.application.name como identificador logico.
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true

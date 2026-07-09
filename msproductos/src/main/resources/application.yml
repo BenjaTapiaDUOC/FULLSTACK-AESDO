@@ -31,9 +31,23 @@ server:
   port: 8082
 
 # ==========================
+# EUREKA CLIENT
+# ==========================
+# Registra este microservicio en mseureka (localhost:8761)
+# usando spring.application.name como identificador logico.
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# ==========================
 # COMUNICACION ENTRE MICROSERVICIOS
 # ==========================
 # URL base del microservicio de restaurantes (msrestaurantes)
 # Se utiliza para validar que el restaurante del producto exista y esté activo.
+# lb:// -> se resuelve vía Eureka (Spring Cloud LoadBalancer), ya
+# no queda "quemado" el puerto 8086.
 msrestaurantes:
-  url: http://localhost:8086
+  url: lb://msrestaurantes

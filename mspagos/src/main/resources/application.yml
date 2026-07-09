@@ -32,10 +32,25 @@ server:
   port: 8084
 
 # ==========================
+# EUREKA CLIENT
+# ==========================
+# Registra este microservicio en mseureka (localhost:8761)
+# usando spring.application.name como identificador logico.
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+# ==========================
 # COMUNICACION ENTRE MICROSERVICIOS
 # ==========================
 # URL base del microservicio de Pedidos.
 # Se utiliza para notificar el estado del pago sobre el pedido asociado.
+# lb:// -> se resuelve vía Eureka (Spring Cloud LoadBalancer).
+# Se mantiene el sufijo /pedidos porque PedidoClient concatena
+# esta URL base directamente con "/{id}".
 microservicio:
   pedidos:
-    url: http://localhost:8083/pedidos
+    url: lb://mspedidos/pedidos
