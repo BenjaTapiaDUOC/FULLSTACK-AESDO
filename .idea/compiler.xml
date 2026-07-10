@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="msgateway" />
+        <module name="mseureka" />
+      </profile>
+      <profile name="Annotation profile for msautenticacion" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="msproductos" />
+        <module name="msdelivery" />
+        <module name="msrepartidores" />
+        <module name="msnotificaciones" />
+        <module name="msusuarios" />
+        <module name="mspagos" />
+        <module name="mspedidos" />
+        <module name="msautenticacion" />
+        <module name="mspromociones" />
+        <module name="msrestaurantes" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="msautenticacion" options="-parameters" />
+      <module name="msdelivery" options="-parameters" />
+      <module name="mseureka" options="-parameters" />
+      <module name="msgateway" options="-parameters" />
+      <module name="msnotificaciones" options="-parameters" />
+      <module name="mspagos" options="-parameters" />
+      <module name="mspedidos" options="-parameters" />
+      <module name="msproductos" options="-parameters" />
+      <module name="mspromociones" options="-parameters" />
+      <module name="msrepartidores" options="-parameters" />
+      <module name="msrestaurantes" options="-parameters" />
+      <module name="msusuarios" options="-parameters" />
+    </option>
+  </component>
+</project>
