@@ -1,0 +1,304 @@
+name: aesdo-microservicios
+
+# ===========================================================
+# DOCKER COMPOSE - Ecosistema AESDO
+# ===========================================================
+# Levanta: MySQL, mseureka (registro), 10 microservicios y
+# msgateway (punto de entrada unico en el puerto 8080).
+#
+# No se modifica ningun application.yml existente: la conexion
+# a MySQL y a Eureka se sobreescribe via variables de entorno
+# (SPRING_DATASOURCE_* y EUREKA_URL), que Spring Boot toma con
+# mayor prioridad que los valores fijos del YAML.
+#
+# Uso:
+#   docker compose up -d --build
+#   docker compose logs -f msgateway
+#   docker compose down          (mantiene los datos de MySQL)
+#   docker compose down -v       (borra tambien el volumen de MySQL)
+# ===========================================================
+
+x-eureka-env: &eureka-env
+  EUREKA_URL: http://mseureka:8761/eureka
+
+x-db-credentials: &db-credentials
+  SPRING_DATASOURCE_USERNAME: root
+  SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+
+services:
+
+  # -----------------------------------------------------------
+  # BASE DE DATOS
+  # -----------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: aesdo-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - aesdo-net
+
+  # -----------------------------------------------------------
+  # SERVIDOR DE DESCUBRIMIENTO
+  # -----------------------------------------------------------
+  mseureka:
+    build:
+      context: ./mseureka
+      dockerfile: Dockerfile
+    container_name: aesdo-mseureka
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - aesdo-net
+
+  # -----------------------------------------------------------
+  # MICROSERVICIOS DE NEGOCIO
+  # -----------------------------------------------------------
+  msusuarios:
+    build:
+      context: ./msusuarios
+      dockerfile: Dockerfile
+    container_name: aesdo-msusuarios
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msusuarios?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msproductos:
+    build:
+      context: ./msproductos
+      dockerfile: Dockerfile
+    container_name: aesdo-msproductos
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msproductos?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  mspedidos:
+    build:
+      context: ./mspedidos
+      dockerfile: Dockerfile
+    container_name: aesdo-mspedidos
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mspedidos?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8083:8083"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  mspagos:
+    build:
+      context: ./mspagos
+      dockerfile: Dockerfile
+    container_name: aesdo-mspagos
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mspagos?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msdelivery:
+    build:
+      context: ./msdelivery
+      dockerfile: Dockerfile
+    container_name: aesdo-msdelivery
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msdelivery?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8085:8085"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msrestaurantes:
+    build:
+      context: ./msrestaurantes
+      dockerfile: Dockerfile
+    container_name: aesdo-msrestaurantes
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msrestaurantes?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8086:8086"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  mspromociones:
+    build:
+      context: ./mspromociones
+      dockerfile: Dockerfile
+    container_name: aesdo-mspromociones
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mspromociones?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8087:8087"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msrepartidores:
+    build:
+      context: ./msrepartidores
+      dockerfile: Dockerfile
+    container_name: aesdo-msrepartidores
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msrepartidores?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8088:8088"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msnotificaciones:
+    build:
+      context: ./msnotificaciones
+      dockerfile: Dockerfile
+    container_name: aesdo-msnotificaciones
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msnotificaciones?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8089:8089"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  msautenticacion:
+    build:
+      context: ./msautenticacion
+      dockerfile: Dockerfile
+    container_name: aesdo-msautenticacion
+    restart: unless-stopped
+    environment:
+      <<: [*eureka-env, *db-credentials]
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/msautenticacion?createDatabaseIfNotExist=true&serverTimezone=UTC
+    ports:
+      - "8090:8090"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mseureka:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+  # -----------------------------------------------------------
+  # API GATEWAY - punto de entrada unico (8080)
+  # -----------------------------------------------------------
+  msgateway:
+    build:
+      context: ./msgateway
+      dockerfile: Dockerfile
+    container_name: aesdo-msgateway
+    restart: unless-stopped
+    environment:
+      <<: *eureka-env
+    ports:
+      - "8080:8080"
+    depends_on:
+      mseureka:
+        condition: service_started
+      msusuarios:
+        condition: service_started
+      msproductos:
+        condition: service_started
+      mspedidos:
+        condition: service_started
+      mspagos:
+        condition: service_started
+      msdelivery:
+        condition: service_started
+      msrestaurantes:
+        condition: service_started
+      mspromociones:
+        condition: service_started
+      msrepartidores:
+        condition: service_started
+      msnotificaciones:
+        condition: service_started
+      msautenticacion:
+        condition: service_started
+    networks:
+      - aesdo-net
+
+networks:
+  aesdo-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
